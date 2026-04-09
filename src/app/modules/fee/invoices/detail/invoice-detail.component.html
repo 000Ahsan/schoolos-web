@@ -1,0 +1,131 @@
+<div class="flex flex-col flex-auto min-w-0 print:m-0 print:p-0">
+
+    <!-- Header Section (Hidden on Print) -->
+    <div class="bg-card px-8 pt-10 pb-6 border-b print:hidden">
+        <div class="flex items-center mb-4 text-secondary cursor-pointer hover:text-primary transition-colors"
+            [routerLink]="['/fee/invoices']">
+            <mat-icon class="icon-size-5" svgIcon="heroicons_outline:arrow-left"></mat-icon>
+            <span class="ml-2 font-medium">Back to Invoices</span>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div class="text-3xl font-semibold tracking-tight leading-8">Invoice {{ invoice?.invoice_no }}</div>
+            <div class="flex items-center space-x-4">
+                <button mat-stroked-button (click)="printInvoice()">
+                    <mat-icon svgIcon="heroicons_outline:printer" class="icon-size-5"></mat-icon>
+                    <span class="ml-2">Print</span>
+                </button>
+                <button mat-flat-button color="primary" *ngIf="invoice?.status !== 'paid' && invoice?.status !== 'void'"
+                    (click)="openPaymentDialog()">
+                    Receive Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-center p-8" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- A4 Printable Area -->
+    <div class="p-8 flex items-center justify-center bg-gray-50 flex-auto print:p-0 print:bg-white w-full"
+        *ngIf="!isLoading && invoice">
+
+        <mat-card
+            class="w-full max-w-4xl shadow rounded-2xl overflow-hidden print:max-w-none print:shadow-none print:rounded-none">
+            <div class="p-8 sm:p-16">
+
+                <!-- School Header -->
+                <div class="flex items-start justify-between border-b pb-8">
+                    <div>
+                        <div class="text-4xl font-bold tracking-tight">SchoolOS Academy</div>
+                        <div class="text-secondary mt-1">123 Education Boulevard, Knowledge City</div>
+                        <div class="text-secondary">+92 300 1234567 | info&#64;schoolosacademy.com</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-4xl font-semibold tracking-tight text-gray-400 uppercase">Invoice</div>
+                        <div class="mt-2 text-lg">No: <strong>{{ invoice.invoice_no }}</strong></div>
+                        <div class="text-secondary">Billing Month: {{ invoice.billing_month }}</div>
+                        <div class="text-secondary">Due Date: {{ invoice.due_date | date:'longDate' }}</div>
+                    </div>
+                </div>
+
+                <!-- Student Info -->
+                <div class="flex items-start justify-between mt-8">
+                    <div>
+                        <div class="text-lg font-medium text-secondary">Billed To:</div>
+                        <div class="text-2xl font-semibold">{{ invoice.student?.name }}</div>
+                        <div class="text-secondary mt-1">Roll No: {{ invoice.student?.roll_no }}</div>
+                        <div class="text-secondary">Class {{ invoice.student?.class_id }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-medium text-secondary">Status:</div>
+                        <div class="mt-1">
+                            <span
+                                class="inline-flex items-center px-4 py-1 rounded-full text-base font-semibold uppercase tracking-wider"
+                                [ngClass]="{
+                  'bg-green-100 text-green-800': invoice.status === 'paid',
+                  'bg-yellow-100 text-yellow-800': invoice.status === 'partial',
+                  'bg-red-100 text-red-800': invoice.status === 'unpaid',
+                  'bg-gray-100 text-gray-800': invoice.status === 'void'
+                }">{{ invoice.status }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Items -->
+                <div class="mt-12 overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b-2 font-medium text-secondary">
+                                <th class="py-3 px-2">Description</th>
+                                <th class="py-3 px-2 text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Base Fees -->
+                            <tr class="border-b" *ngFor="let item of invoice.line_items">
+                                <td class="py-4 px-2">{{ item.fee_head_name }}</td>
+                                <td class="py-4 px-2 text-right">{{ item.amount | currency:'PKR':'symbol':'1.2-2' }}
+                                </td>
+                            </tr>
+                            <!-- Applicable Discounts -->
+                            <tr class="border-b text-red-500" *ngFor="let disc of invoice.applied_discounts">
+                                <td class="py-4 px-2">Discount ({{ disc.discount_name }})</td>
+                                <td class="py-4 px-2 text-right">-{{ disc.amount | currency:'PKR':'symbol':'1.2-2' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Totals -->
+                <div class="flex justify-end mt-8">
+                    <div class="w-1/2">
+                        <div class="flex justify-between py-2">
+                            <span class="font-medium text-secondary">Subtotal:</span>
+                            <span>{{ invoice.total_amount | currency:'PKR':'symbol':'1.2-2' }}</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="font-medium text-secondary">Amount Paid:</span>
+                            <span class="text-green-600">{{ invoice.amount_paid | currency:'PKR':'symbol':'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between py-4 mt-2 border-t-2 text-2xl font-semibold">
+                            <span>Balance Due:</span>
+                            <span [class.text-red-600]="(invoice.total_amount - invoice.amount_paid) > 0">
+                                {{ (invoice.total_amount - invoice.amount_paid) | currency:'PKR':'symbol':'1.2-2' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-16 pt-8 border-t text-sm text-secondary text-center">
+                    Please pay your invoice by the due date to avoid late fees. Thank you for your business.
+                </div>
+
+            </div>
+        </mat-card>
+    </div>
+</div>
