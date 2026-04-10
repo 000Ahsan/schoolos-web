@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ApiService } from 'app/core/services/api.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector: 'app-class-list',
@@ -38,6 +39,7 @@ export class ClassListComponent implements OnInit {
     private _apiService = inject(ApiService);
     private _fb = inject(FormBuilder);
     private _snackBar = inject(MatSnackBar);
+    private _fuseConfirmationService = inject(FuseConfirmationService);
 
     @ViewChild('drawer') drawer: MatDrawer;
     @ViewChild(MatSort) sort: MatSort;
@@ -111,6 +113,33 @@ export class ClassListComponent implements OnInit {
             error: () => {
                 this.isSaving = false;
                 this._snackBar.open(`Error saving class`, 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    deleteClass(cls: any) {
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Delete Class',
+            message: `Are you sure you want to delete ${cls.name}? All students in this class will lose their class association. This action cannot be undone!`,
+            actions: {
+                confirm: {
+                    label: 'Delete',
+                    color: 'warn'
+                }
+            }
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this._apiService.deleteClass(cls.id).subscribe({
+                    next: () => {
+                        this._snackBar.open('Class deleted successfully', 'Close', { duration: 3000 });
+                        this.loadClasses();
+                    },
+                    error: () => {
+                        this._snackBar.open('Error deleting class. It might have students assigned to it.', 'Close', { duration: 3000 });
+                    }
+                });
             }
         });
     }

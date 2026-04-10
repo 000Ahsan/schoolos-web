@@ -10,8 +10,10 @@
                 {{ studentId ? 'Edit Student' : 'New Student' }}
             </div>
             <div class="flex items-center space-x-4">
-                <button mat-stroked-button [routerLink]="['/students']">Cancel</button>
-                <button mat-flat-button color="primary" [disabled]="isLoading" (click)="save()">Save</button>
+                <button mat-flat-button color="primary" [disabled]="isLoading" (click)="save()">
+                    <mat-icon svgIcon="heroicons_solid:check"></mat-icon>
+                    <span class="ml-2">Save Student</span>
+                </button>
             </div>
         </div>
     </div>
@@ -27,111 +29,158 @@
             <!-- Basic Information -->
             <mat-card class="shadow rounded-2xl overflow-hidden p-6 py-8 bg-white">
                 <div class="text-lg font-medium tracking-tight mb-6">Basic Information</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Full Name</mat-label>
-                        <input matInput formControlName="name" required>
-                        <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
-                    </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Roll Number</mat-label>
-                        <input matInput formControlName="roll_no" required>
-                        <mat-error *ngIf="form.get('roll_no')?.hasError('required')">Roll Number is required</mat-error>
-                    </mat-form-field>
+                <div class="flex flex-col sm:flex-row items-start gap-8 mb-8 pb-8 border-b border-dashed">
+                    <!-- Image Preview & Picker -->
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="relative w-48 h-48 rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center group cursor-pointer"
+                            (click)="fileInput.click()">
+                            <img *ngIf="previewUrl" [src]="previewUrl" class="w-full h-full object-cover">
+                            <div *ngIf="!previewUrl" class="flex flex-col items-center text-gray-400">
+                                <mat-icon class="icon-size-10" svgIcon="heroicons_outline:user-circle"></mat-icon>
+                                <span class="text-xs font-medium">No Image</span>
+                            </div>
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <mat-icon class="text-white" svgIcon="heroicons_outline:camera"></mat-icon>
+                            </div>
+                        </div>
+                        <input #fileInput type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+                        <button type="button" mat-stroked-button color="primary"
+                            class="h-8 min-h-8 px-4 text-xs font-medium rounded-full" (click)="fileInput.click()">
+                            {{ previewUrl ? 'Change Photo' : 'Upload Photo' }}
+                        </button>
+                        <p class="text-[10px] text-secondary text-center max-w-[120px]">JPG or PNG, max 2MB (Optional)
+                        </p>
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Father Name</mat-label>
-                        <input matInput formControlName="father_name" required>
-                        <mat-error *ngIf="form.get('father_name')?.hasError('required')">Father Name is
-                            required</mat-error>
-                    </mat-form-field>
+                    <div class="flex-auto grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 w-full">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Full Name</mat-label>
+                            <input matInput formControlName="name" required>
+                            <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Class</mat-label>
-                        <mat-select formControlName="class_id" required>
-                            <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="form.get('class_id')?.hasError('required')">Class is required</mat-error>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Roll Number</mat-label>
+                            <input matInput formControlName="roll_no" required>
+                            <mat-error *ngIf="form.get('roll_no')?.hasError('required')">Roll Number is
+                                required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Date of Birth</mat-label>
-                        <input matInput [matDatepicker]="dobPicker" formControlName="date_of_birth">
-                        <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #dobPicker></mat-datepicker>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Father Name</mat-label>
+                            <input matInput formControlName="father_name" required>
+                            <mat-error *ngIf="form.get('father_name')?.hasError('required')">Father Name is
+                                required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Gender</mat-label>
-                        <mat-select formControlName="gender">
-                            <mat-option value="male">Male</mat-option>
-                            <mat-option value="female">Female</mat-option>
-                            <mat-option value="other">Other</mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Class</mat-label>
+                            <mat-select formControlName="class_id" required>
+                                <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="form.get('class_id')?.hasError('required')">Class is required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Admission Date</mat-label>
-                        <input matInput [matDatepicker]="admPicker" formControlName="admission_date" required>
-                        <mat-datepicker-toggle matIconSuffix [for]="admPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #admPicker></mat-datepicker>
-                        <mat-error *ngIf="form.get('admission_date')?.hasError('required')">Admission Date is
-                            required</mat-error>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Date of Birth</mat-label>
+                            <input matInput [matDatepicker]="dobPicker" formControlName="date_of_birth" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #dobPicker></mat-datepicker>
+                            <mat-error *ngIf="form.get('date_of_birth')?.hasError('required')">DOB is
+                                required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>B-Form Number</mat-label>
-                        <input matInput formControlName="b_form_no">
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Gender</mat-label>
+                            <mat-select formControlName="gender" required>
+                                <mat-option value="male">Male</mat-option>
+                                <mat-option value="female">Female</mat-option>
+                                <mat-option value="other">Other</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="form.get('gender')?.hasError('required')">Gender is required</mat-error>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full" *ngIf="studentId">
-                        <mat-label>Status</mat-label>
-                        <mat-select formControlName="status">
-                            <mat-option value="active">Active</mat-option>
-                            <mat-option value="left">Left</mat-option>
-                            <mat-option value="graduated">Graduated</mat-option>
-                            <mat-option value="suspended">Suspended</mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Admission Date</mat-label>
+                            <input matInput [matDatepicker]="admPicker" formControlName="admission_date" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="admPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #admPicker></mat-datepicker>
+                            <mat-error *ngIf="form.get('admission_date')?.hasError('required')">Admission Date is
+                                required</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>B-Form Number</mat-label>
+                            <input matInput formControlName="b_form_no" mask="00000-0000000-0"
+                                placeholder="00000-0000000-0">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full" *ngIf="studentId">
+                            <mat-label>Status</mat-label>
+                            <mat-select formControlName="status">
+                                <mat-option value="active">Active</mat-option>
+                                <mat-option value="left">Left</mat-option>
+                                <mat-option value="graduated">Graduated</mat-option>
+                                <mat-option value="suspended">Suspended</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
                 </div>
             </mat-card>
 
-            <!-- Contact Information -->
+            <!-- Guardian Information -->
             <mat-card class="shadow rounded-2xl overflow-hidden p-6 py-8 bg-white">
-                <div class="text-lg font-medium tracking-tight mb-6">Contact Information</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-                    <mat-form-field appearance="outline" class="w-full sm:col-span-2">
-                        <mat-label>Parent Name</mat-label>
-                        <input matInput formControlName="parent_name">
+                <div class="text-lg font-medium tracking-tight mb-6">Guardian Information</div>
+                <div class="grid grid-cols-1 sm:grid-cols-6 gap-x-6 gap-y-2">
+                    <mat-form-field appearance="outline" class="w-full sm:col-span-3">
+                        <mat-label>Guardian Name</mat-label>
+                        <input matInput formControlName="guardian_name" required>
+                        <mat-error *ngIf="form.get('guardian_name')?.hasError('required')">Guardian name is
+                            required</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Parent Phone</mat-label>
-                        <input matInput formControlName="parent_phone" placeholder="+923001234567" required>
-                        <mat-error *ngIf="form.get('parent_phone')?.hasError('required')">Parent phone is
+                    <mat-form-field appearance="outline" class="w-full sm:col-span-3">
+                        <mat-label>Relation with Student</mat-label>
+                        <mat-select formControlName="guardian_relation" required>
+                            <mat-option value="Father">Father</mat-option>
+                            <mat-option value="Mother">Mother</mat-option>
+                            <mat-option value="Brother">Brother</mat-option>
+                            <mat-option value="Sister">Sister</mat-option>
+                            <mat-option value="Uncle">Uncle</mat-option>
+                            <mat-option value="Aunt">Aunt</mat-option>
+                            <mat-option value="Other">Other</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="form.get('guardian_relation')?.hasError('required')">Relation is
                             required</mat-error>
-                        <mat-error *ngIf="form.get('parent_phone')?.hasError('pattern')">Format must be
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+                        <mat-label>Guardian Phone</mat-label>
+                        <input matInput formControlName="guardian_phone" placeholder="+923001234567" required>
+                        <mat-error *ngIf="form.get('guardian_phone')?.hasError('required')">Guardian phone is
+                            required</mat-error>
+                        <mat-error *ngIf="form.get('guardian_phone')?.hasError('pattern')">Format must be
                             +923001234567</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Parent WhatsApp</mat-label>
-                        <input matInput formControlName="parent_whatsapp" placeholder="Leave blank if same as phone">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Parent CNIC</mat-label>
-                        <input matInput formControlName="parent_cnic">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Emergency Contact</mat-label>
-                        <input matInput formControlName="emergency_contact">
+                    <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+                        <mat-label>Guardian CNIC</mat-label>
+                        <input matInput formControlName="guardian_cnic" mask="00000-0000000-0"
+                            placeholder="00000-0000000-0">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full sm:col-span-2">
-                        <mat-label>Address</mat-label>
+                        <mat-label>Emergency Contact</mat-label>
+                        <input matInput formControlName="emergency_contact" placeholder="+923001234567">
+                        <mat-error *ngIf="form.get('emergency_contact')?.hasError('pattern')">Format must be
+                            +923001234567</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full sm:col-span-6">
+                        <mat-label>Full Address</mat-label>
                         <textarea matInput formControlName="address" rows="3"></textarea>
                     </mat-form-field>
                 </div>
@@ -139,10 +188,13 @@
         </form>
 
         <!-- DISCOUNTS SECTION (Only on Edit mode) -->
-        <mat-card *ngIf="studentId && !(isLoading && studentId)" class="shadow rounded-2xl overflow-hidden">
-            <div class="flex items-center justify-between p-6 md:p-8 bg-gray-50 border-b">
+        <mat-card *ngIf="studentId && !(isLoading && studentId)" class="shadow rounded-2xl overflow-hidden bg-white">
+            <div class="flex items-center justify-between p-6 md:p-8 border-b">
                 <div class="text-lg font-medium tracking-tight">Discounts</div>
-                <button mat-flat-button color="primary" (click)="openDiscountDialog()">Add Discount</button>
+                <button mat-flat-button color="primary" (click)="openDiscountDialog()">
+                    <mat-icon svgIcon="heroicons_outline:plus"></mat-icon>
+                    <span class="ml-2">Add Discount</span>
+                </button>
             </div>
             <div class="overflow-x-auto w-full">
                 <table mat-table [dataSource]="discounts" class="w-full min-w-max bg-transparent">
@@ -179,22 +231,6 @@
                             <span *ngIf="element.applies_to === 'all'">All Fees</span>
                             <span *ngIf="element.applies_to === 'tuition_only'">Tuition Only</span>
                             <span *ngIf="element.applies_to === 'specific_head'">{{ element.fee_head_name }}</span>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="valid_from">
-                        <th mat-header-cell *matHeaderCellDef> Valid From </th>
-                        <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
-                            [class.text-disabled]="!element.is_active">
-                            {{element.valid_from | date:'dd MMM yyyy'}}
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="valid_until">
-                        <th mat-header-cell *matHeaderCellDef> Valid Until </th>
-                        <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
-                            [class.text-disabled]="!element.is_active">
-                            {{element.valid_until ? (element.valid_until | date:'dd MMM yyyy') : 'Indefinite'}}
                         </td>
                     </ng-container>
 

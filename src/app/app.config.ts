@@ -16,12 +16,14 @@ import { provideAuth } from 'app/core/auth/auth.provider';
 import { provideIcons } from 'app/core/icons/icons.provider';
 import { MockApiService } from 'app/mock-api';
 import { firstValueFrom } from 'rxjs';
+import { provideNgxMask } from 'ngx-mask';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideAnimations(),
         provideHttpClient(),
+        provideNgxMask(),
         provideRouter(
             appRoutes,
             withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })

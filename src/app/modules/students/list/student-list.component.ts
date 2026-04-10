@@ -15,6 +15,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ApiService } from 'app/core/services/api.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector: 'app-student-list',
@@ -41,6 +42,7 @@ export class StudentListComponent implements OnInit {
     private _apiService = inject(ApiService);
     private _dialog = inject(MatDialog);
     private _snackBar = inject(MatSnackBar);
+    private _fuseConfirmationService = inject(FuseConfirmationService);
 
     displayedColumns: string[] = ['photo', 'roll_no', 'name', 'father_name', 'class', 'status', 'parent_phone', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
@@ -114,18 +116,33 @@ export class StudentListComponent implements OnInit {
         });
     }
 
-    deleteStudent(id: number) {
-        // Basic confirmation dialog here (can use Fuse or MatDialog, keeping it simple HTML confirm for now)
-        if (confirm('Are you sure you want to delete this student?')) {
-            this._apiService.deleteStudent(id).subscribe({
-                next: () => {
-                    this._snackBar.open('Student deleted successfully', 'Close', { duration: 3000 });
-                    this.loadStudents();
-                },
-                error: () => {
-                    this._snackBar.open('Failed to delete student', 'Close', { duration: 3000 });
+    deleteStudent(student: any) {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Delete Student',
+            message: `Are you sure you want to delete ${student.name}? This action cannot be undone!`,
+            actions: {
+                confirm: {
+                    label: 'Delete',
+                    color: 'warn'
                 }
-            });
-        }
+            }
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this._apiService.deleteStudent(student.id).subscribe({
+                    next: () => {
+                        this._snackBar.open('Student deleted successfully', 'Close', { duration: 3000 });
+                        this.loadStudents();
+                    },
+                    error: () => {
+                        this._snackBar.open('Failed to delete student', 'Close', { duration: 3000 });
+                    }
+                });
+            }
+        });
     }
 }

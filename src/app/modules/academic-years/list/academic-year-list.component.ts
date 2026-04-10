@@ -1,88 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { ApiService } from 'app/core/services/api.service';
-
-@Component({
-    selector: 'app-year-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDatepickerModule,
-        MatDialogModule
-    ],
-    template: `
-    <h2 mat-dialog-title>Add Academic Year</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form" class="flex flex-col gap-4 pt-4">
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Year Label</mat-label>
-          <input matInput formControlName="label" placeholder="e.g. 2024-2025" required>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Start Date</mat-label>
-          <input matInput [matDatepicker]="startPicker" formControlName="start_date" required>
-          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-          <mat-datepicker #startPicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>End Date</mat-label>
-          <input matInput [matDatepicker]="endPicker" formControlName="end_date" required>
-          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-          <mat-datepicker #endPicker></mat-datepicker>
-        </mat-form-field>
-
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">Save</button>
-    </mat-dialog-actions>
-  `
-})
-export class YearDialogComponent {
-    form: FormGroup;
-    private _fb = inject(FormBuilder);
-    private _dialogRef = inject(MatDialogRef<YearDialogComponent>);
-
-    constructor() {
-        this.form = this._fb.group({
-            label: ['', Validators.required],
-            start_date: [null, Validators.required],
-            end_date: [null, Validators.required]
-        });
-    }
-
-    save() {
-        if (this.form.valid) {
-            const val = { ...this.form.value };
-            if (val.start_date && val.start_date.toISODate) val.start_date = val.start_date.toISODate();
-            else val.start_date = new Date(val.start_date).toISOString().split('T')[0];
-
-            if (val.end_date && val.end_date.toISODate) val.end_date = val.end_date.toISODate();
-            else val.end_date = new Date(val.end_date).toISOString().split('T')[0];
-
-            this._dialogRef.close(val);
-        }
-    }
-}
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector: 'app-promote-dialog',
@@ -143,6 +73,11 @@ export class PromoteDialogComponent {
         MatDialogModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        MatSidenavModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDatepickerModule,
+        ReactiveFormsModule,
         DatePipe
     ],
     templateUrl: './academic-year-list.component.html'
@@ -151,10 +86,25 @@ export class AcademicYearListComponent implements OnInit {
     private _apiService = inject(ApiService);
     private _dialog = inject(MatDialog);
     private _snackBar = inject(MatSnackBar);
+    private _fb = inject(FormBuilder);
+    private _fuseConfirmationService = inject(FuseConfirmationService);
+
+    @ViewChild('drawer') drawer: MatDrawer;
 
     displayedColumns = ['label', 'start_date', 'end_date', 'status', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
     isLoading = true;
+    isSaving = false;
+    selectedId: number | null = null;
+    form: FormGroup;
+
+    constructor() {
+        this.form = this._fb.group({
+            label: ['', Validators.required],
+            start_date: [null, Validators.required],
+            end_date: [null, Validators.required]
+        });
+    }
 
     ngOnInit() {
         this.loadYears();
@@ -170,7 +120,7 @@ export class AcademicYearListComponent implements OnInit {
                     if (y.is_current) status = 'current';
                     else if (y.start_date > today) status = 'upcoming';
                     else if (y.end_date < today) status = 'past';
-                    else status = 'past'; // Default for already passed terms that aren't marked current
+                    else status = 'past';
 
                     return { ...y, status };
                 });
@@ -183,16 +133,73 @@ export class AcademicYearListComponent implements OnInit {
         });
     }
 
-    openAddDialog() {
-        const dialogRef = this._dialog.open(YearDialogComponent, { width: '400px' });
-        dialogRef.afterClosed().subscribe(res => {
-            if (res) {
-                this._apiService.createAcademicYear(res).subscribe({
+    openDrawer(mode: 'add' | 'edit', year?: any) {
+        if (mode === 'add') {
+            this.selectedId = null;
+            this.form.reset();
+        } else {
+            this.selectedId = year.id;
+            this.form.patchValue(year);
+        }
+        this.drawer.open();
+    }
+
+    closeDrawer() {
+        this.drawer.close();
+    }
+
+    save() {
+        if (this.form.invalid) return;
+        this.isSaving = true;
+
+        const val = { ...this.form.value };
+        const formatDate = (date: any) => {
+            if (!date) return null;
+            if (date.toISODate) return date.toISODate();
+            return new Date(date).toISOString().split('T')[0];
+        };
+
+        val.start_date = formatDate(val.start_date);
+        val.end_date = formatDate(val.end_date);
+
+        const request = this.selectedId
+            ? this._apiService.updateAcademicYear(this.selectedId, val)
+            : this._apiService.createAcademicYear(val);
+
+        request.subscribe({
+            next: () => {
+                this._snackBar.open(`Academic Year ${this.selectedId ? 'updated' : 'added'} successfully`, 'Close', { duration: 3000 });
+                this.isSaving = false;
+                this.closeDrawer();
+                this.loadYears();
+            },
+            error: () => {
+                this.isSaving = false;
+                this._snackBar.open('Error saving academic year', 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    deleteYear(year: any) {
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Delete Academic Year',
+            message: `Are you sure you want to delete ${year.label}? This will not delete students or grades but might cause issues with fee tracking linked to this year.`,
+            actions: {
+                confirm: {
+                    label: 'Delete',
+                    color: 'warn'
+                }
+            }
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this._apiService.deleteAcademicYear(year.id).subscribe({
                     next: () => {
-                        this._snackBar.open('Academic Year added successfully', 'Close', { duration: 3000 });
+                        this._snackBar.open('Academic Year deleted successfully', 'Close', { duration: 3000 });
                         this.loadYears();
                     },
-                    error: () => this._snackBar.open('Error creating academic year', 'Close', { duration: 3000 })
+                    error: () => this._snackBar.open('Error deleting academic year', 'Close', { duration: 3000 })
                 });
             }
         });

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from 'app/core/services/api.service';
+import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
     selector: 'app-discount-dialog',
@@ -60,20 +61,6 @@ import { ApiService } from 'app/core/services/api.service';
         </mat-form-field>
         
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Valid From</mat-label>
-          <input matInput [matDatepicker]="pickerFrom" formControlName="valid_from" required>
-          <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-          <mat-datepicker #pickerFrom></mat-datepicker>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Valid Until</mat-label>
-          <input matInput [matDatepicker]="pickerUntil" formControlName="valid_until">
-          <mat-datepicker-toggle matIconSuffix [for]="pickerUntil"></mat-datepicker-toggle>
-          <mat-datepicker #pickerUntil></mat-datepicker>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Remarks</mat-label>
           <textarea matInput formControlName="remarks" rows="2"></textarea>
         </mat-form-field>
@@ -97,8 +84,6 @@ export class DiscountDialogComponent {
             discount_value: [null, [Validators.required, Validators.min(0)]],
             applies_to: ['all', Validators.required],
             fee_head_name: [''],
-            valid_from: [null, Validators.required],
-            valid_until: [null],
             remarks: ['']
         });
     }
@@ -106,8 +91,6 @@ export class DiscountDialogComponent {
     save() {
         if (this.form.valid) {
             const data = { ...this.form.value };
-            if (data.valid_from) data.valid_from = data.valid_from.toISODate ? data.valid_from.toISODate() : new Date(data.valid_from).toISOString().split('T')[0];
-            if (data.valid_until) data.valid_until = data.valid_until.toISODate ? data.valid_until.toISODate() : new Date(data.valid_until).toISOString().split('T')[0];
             this._dialogRef.close(data);
         }
     }
@@ -131,8 +114,8 @@ export class DiscountDialogComponent {
         MatDialogModule,
         MatProgressSpinnerModule,
         CurrencyPipe,
-        DatePipe,
-        TitleCasePipe
+        TitleCasePipe,
+        NgxMaskDirective
     ],
     templateUrl: './student-form.component.html'
 })
@@ -149,8 +132,10 @@ export class StudentFormComponent implements OnInit {
     classes: any[] = [];
     discounts: any[] = [];
     isLoading = false;
+    selectedFile: File | null = null;
+    previewUrl: string | null = null;
 
-    discountColumns = ['discount_name', 'discount_type', 'discount_value', 'applies_to', 'valid_from', 'valid_until', 'is_active', 'actions'];
+    discountColumns = ['discount_name', 'discount_type', 'discount_value', 'applies_to', 'is_active', 'actions'];
 
     constructor() {
         this.form = this._fb.group({
@@ -158,17 +143,18 @@ export class StudentFormComponent implements OnInit {
             roll_no: ['', Validators.required],
             father_name: ['', Validators.required],
             class_id: [null, Validators.required],
-            date_of_birth: [null],
-            gender: [null],
+            date_of_birth: [null, Validators.required],
+            gender: [null, Validators.required],
             admission_date: [null, Validators.required],
             b_form_no: [''],
             status: ['active'],
-            parent_name: [''],
-            parent_phone: ['', [Validators.required, Validators.pattern('^\\+92[0-9]{10}$')]],
-            parent_whatsapp: [''],
-            parent_cnic: [''],
-            emergency_contact: [''],
-            address: ['']
+            guardian_name: ['', Validators.required],
+            guardian_relation: ['', Validators.required],
+            guardian_phone: ['', [Validators.required, Validators.pattern('^\\+92[0-9]{10}$')]],
+            guardian_cnic: [''],
+            emergency_contact: ['', [Validators.pattern('^\\+92[0-9]{10}$')]],
+            address: [''],
+            photo_path: [null]
         });
     }
 
@@ -186,11 +172,26 @@ export class StudentFormComponent implements OnInit {
         }
     }
 
+    onFileSelected(event: any) {
+        const file = event.target.files[0];
+        if (file) {
+            this.selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.previewUrl = reader.result as string;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     loadStudent() {
         this.isLoading = true;
         this._apiService.getStudent(this.studentId!).subscribe({
             next: (student) => {
                 this.form.patchValue(student);
+                if (student.photo_url) {
+                    this.previewUrl = student.photo_url;
+                }
                 this.isLoading = false;
             },
             error: () => this.isLoading = false
@@ -207,17 +208,39 @@ export class StudentFormComponent implements OnInit {
             return;
         }
 
-        const val = { ...this.form.value };
-        if (val.date_of_birth && val.date_of_birth.toISODate) val.date_of_birth = val.date_of_birth.toISODate();
-        else if (val.date_of_birth) val.date_of_birth = new Date(val.date_of_birth).toISOString().split('T')[0];
+        const formValue = { ...this.form.value };
 
-        if (val.admission_date && val.admission_date.toISODate) val.admission_date = val.admission_date.toISODate();
-        else if (val.admission_date) val.admission_date = new Date(val.admission_date).toISOString().split('T')[0];
+        // Format dates
+        const formatDate = (date: any) => {
+            if (!date) return null;
+            if (date.toISODate) return date.toISODate();
+            return new Date(date).toISOString().split('T')[0];
+        };
+
+        const formData = new FormData();
+        Object.keys(formValue).forEach(key => {
+            const value = formValue[key];
+            if (key === 'date_of_birth' || key === 'admission_date') {
+                formData.append(key, formatDate(value) ?? '');
+            } else {
+                formData.append(key, value ?? '');
+            }
+        });
+
+        if (this.selectedFile) {
+            formData.append('photo', this.selectedFile);
+        }
+
+        // Add _method spoofing for PUT requests if editing
+        if (this.studentId) {
+            formData.append('_method', 'PUT');
+        }
 
         this.isLoading = true;
+        // For updates with files, we must use POST with _method=PUT in Laravel
         const req = this.studentId
-            ? this._apiService.updateStudent(this.studentId, val)
-            : this._apiService.createStudent(val);
+            ? this._apiService.createStudent(formData, this.studentId) // Use create but with ID override
+            : this._apiService.createStudent(formData);
 
         req.subscribe({
             next: () => {
@@ -227,7 +250,6 @@ export class StudentFormComponent implements OnInit {
             error: (err) => {
                 this.isLoading = false;
                 if (err.status === 422) {
-                    // Apply errors locally - mock fallback
                     this._snackBar.open('Form validation error', 'Close', { duration: 3000 });
                 }
             }

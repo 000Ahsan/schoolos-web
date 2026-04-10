@@ -10,18 +10,18 @@ const _navigationBase: FuseNavigationItem[] = [
         link: '/dashboard',
     },
     {
-        id: 'students',
-        title: 'Students',
-        type: 'basic',
-        icon: 'heroicons_outline:academic-cap',
-        link: '/students',
-    },
-    {
         id: 'classes',
         title: 'Classes',
         type: 'basic',
         icon: 'heroicons_outline:rectangle-group',
         link: '/classes',
+    },
+    {
+        id: 'students',
+        title: 'Students',
+        type: 'basic',
+        icon: 'heroicons_outline:academic-cap',
+        link: '/students',
     },
     {
         id: 'academic-years',
@@ -65,13 +65,6 @@ const _navigationBase: FuseNavigationItem[] = [
                 link: '/fee/defaulters',
             },
         ],
-    },
-    {
-        id: 'discounts',
-        title: 'Discounts',
-        type: 'basic',
-        icon: 'heroicons_outline:tag',
-        link: '/discounts',
     },
     {
         id: 'whatsapp-logs',

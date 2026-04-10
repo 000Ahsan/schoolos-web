@@ -11,7 +11,10 @@ export class ApiService {
     // Students
     getStudents(params?: any): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/students`, { params }); }
     getStudent(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/students/${id}`); }
-    createStudent(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/students`, data); }
+    createStudent(data: any, id?: number): Observable<any> { 
+        const url = id ? `${this._apiUrl}/students/${id}` : `${this._apiUrl}/students`;
+        return this._http.post<any>(url, data); 
+    }
     updateStudent(id: number, data: any): Observable<any> { return this._http.put<any>(`${this._apiUrl}/students/${id}`, data); }
     deleteStudent(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/students/${id}`); }
 
@@ -19,10 +22,13 @@ export class ApiService {
     getClasses(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/classes`); }
     createClass(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/classes`, data); }
     updateClass(id: number, data: any): Observable<any> { return this._http.put<any>(`${this._apiUrl}/classes/${id}`, data); }
+    deleteClass(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/classes/${id}`); }
 
     // Academic Years
     getAcademicYears(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/academic-years`); }
     createAcademicYear(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/academic-years`, data); }
+    updateAcademicYear(id: number, data: any): Observable<any> { return this._http.put<any>(`${this._apiUrl}/academic-years/${id}`, data); }
+    deleteAcademicYear(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/academic-years/${id}`); }
     setCurrentAcademicYear(id: number): Observable<any> { return this._http.post<any>(`${this._apiUrl}/academic-years/${id}/set-current`, {}); }
     promoteStudents(id: number): Observable<any> { return this._http.post<any>(`${this._apiUrl}/academic-years/${id}/promote-students`, {}); }
 
