@@ -1,151 +1,230 @@
-<div class="flex flex-col flex-auto min-w-0 p-8 pt-10">
-  
-    <div class="flex items-center justify-between w-full mb-8">
-      <div>
-        <div class="text-3xl font-semibold tracking-tight leading-8">Dashboard</div>
-        <div class="font-medium tracking-tight text-secondary">Overview of SchoolOS metrics</div>
-      </div>
+<div class="flex flex-col flex-auto min-w-0 p-8 pt-10 bg-gray-50/50 dark:bg-transparent">
+
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-8 gap-4">
+    <div>
+      <div class="text-3xl font-semibold tracking-tight leading-8">Dashboard Overview</div>
+      <div class="font-medium tracking-tight text-secondary">Your School's Real-time Analytics</div>
     </div>
-  
-    <ng-container *ngIf="isLoading && !stats">
-        <div class="flex flex-col items-center justify-center flex-auto h-full">
-            <mat-icon class="icon-size-24 text-hint" svgIcon="heroicons_outline:arrow-path"></mat-icon>
-            <div class="mt-4 text-2xl font-semibold tracking-tight text-secondary">Loading dashboard...</div>
-        </div>
-    </ng-container>
-    
-    <ng-container *ngIf="!isLoading || stats">
-      <!-- STATS STRIP -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 w-full">
-        <!-- Card 1: Total Students -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden bg-blue-50">
-          <div class="p-6">
-            <div class="flex items-center">
-              <mat-icon class="icon-size-6 text-blue-600" svgIcon="heroicons_outline:academic-cap"></mat-icon>
-              <div class="ml-3 text-lg font-medium tracking-tight leading-6 truncate text-blue-900">Total Students</div>
-            </div>
-            <div class="mt-4 text-4xl font-semibold tracking-tight leading-9 text-blue-600">{{ stats?.total_students || 0 }}</div>
-          </div>
-        </mat-card>
-  
-        <!-- Card 2: Collected Today -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden bg-green-50">
-          <div class="p-6">
-            <div class="flex items-center">
-              <mat-icon class="icon-size-6 text-green-600" svgIcon="heroicons_outline:banknotes"></mat-icon>
-              <div class="ml-3 text-lg font-medium tracking-tight leading-6 truncate text-green-900">Collected Today</div>
-            </div>
-            <div class="mt-4 text-4xl font-semibold tracking-tight leading-9 text-green-600">{{ (stats?.collected_today || 0) | currency:'PKR':'symbol':'1.2-2' }}</div>
-          </div>
-        </mat-card>
-  
-        <!-- Card 3: Collected Month -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden bg-indigo-50">
-          <div class="p-6">
-            <div class="flex items-center">
-              <mat-icon class="icon-size-6 text-indigo-600" svgIcon="heroicons_outline:chart-bar"></mat-icon>
-              <div class="ml-3 text-lg font-medium tracking-tight leading-6 truncate text-indigo-900">Collected (Month)</div>
-            </div>
-            <div class="mt-4 text-4xl font-semibold tracking-tight leading-9 text-indigo-600">{{ (stats?.collected_month || 0) | currency:'PKR':'symbol':'1.2-2' }}</div>
-          </div>
-        </mat-card>
-  
-        <!-- Card 4: Pending Amount -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden bg-amber-50">
-          <div class="p-6">
-            <div class="flex items-center">
-              <mat-icon class="icon-size-6 text-amber-600" svgIcon="heroicons_outline:clock"></mat-icon>
-              <div class="ml-3 text-lg font-medium tracking-tight leading-6 truncate text-amber-900">Pending Amount</div>
-            </div>
-            <div class="mt-4 text-4xl font-semibold tracking-tight leading-9 text-amber-600">{{ (stats?.pending_amount || 0) | currency:'PKR':'symbol':'1.2-2' }}</div>
-          </div>
-        </mat-card>
-  
-        <!-- Card 5: Defaulters -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden bg-red-50">
-          <div class="p-6">
-            <div class="flex items-center">
-              <mat-icon class="icon-size-6 text-red-600" svgIcon="heroicons_outline:exclamation-triangle"></mat-icon>
-              <div class="ml-3 text-lg font-medium tracking-tight leading-6 truncate text-red-900">Defaulters</div>
-            </div>
-            <div class="mt-4 text-4xl font-semibold tracking-tight leading-9 text-red-600">{{ stats?.defaulter_count || 0 }}</div>
-          </div>
-        </mat-card>
-      </div>
-  
-      <!-- BOTTOM STRIP -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-8">
-        
-        <!-- Bottom Left: Recent Payments -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden">
-          <div class="flex flex-col flex-auto p-6 md:p-8">
-            <div class="text-lg font-medium tracking-tight leading-6 truncate">Recent Payments</div>
-            <div class="mt-4 overflow-x-auto">
-              <table mat-table [dataSource]="recentPayments" class="w-full">
-                <!-- Receipt Column -->
-                <ng-container matColumnDef="receipt_no">
-                  <th mat-header-cell *matHeaderCellDef> Receipt No </th>
-                  <td mat-cell *matCellDef="let element"> {{element.receipt_no}} </td>
-                </ng-container>
-  
-                <!-- Student Column -->
-                <ng-container matColumnDef="student_name">
-                  <th mat-header-cell *matHeaderCellDef> Student </th>
-                  <td mat-cell *matCellDef="let element"> {{element.student?.name}} </td>
-                </ng-container>
-  
-                <!-- Amount Column -->
-                <ng-container matColumnDef="amount">
-                  <th mat-header-cell *matHeaderCellDef> Amount </th>
-                  <td mat-cell *matCellDef="let element"> {{element.amount_paid | currency:'PKR':'symbol':'1.2-2'}} </td>
-                </ng-container>
-  
-                <!-- Method Column -->
-                <ng-container matColumnDef="payment_method">
-                  <th mat-header-cell *matHeaderCellDef> Method </th>
-                  <td mat-cell *matCellDef="let element"> {{element.payment_method | titlecase}} </td>
-                </ng-container>
-  
-                <!-- Date Column -->
-                <ng-container matColumnDef="payment_date">
-                  <th mat-header-cell *matHeaderCellDef> Date </th>
-                  <td mat-cell *matCellDef="let element"> {{element.payment_date | date:'dd MMM yyyy'}} </td>
-                </ng-container>
-  
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-              
-              <div *ngIf="recentPayments.length === 0 && !isLoading" class="p-8 sm:p-16 border-t font-medium text-secondary text-center">
-                No recent payments
-              </div>
-            </div>
-          </div>
-        </mat-card>
-  
-        <!-- Bottom Right: Classwise Collection -->
-        <mat-card class="flex flex-col flex-auto shadow rounded-2xl overflow-hidden">
-          <div class="flex flex-col flex-auto p-6 md:p-8">
-            <div class="text-lg font-medium tracking-tight leading-6 truncate">Class-wise Collection</div>
-            <div class="mt-4 h-80 flex-auto w-full">
-              <apx-chart
-                [series]="chartOptions.series"
-                [chart]="chartOptions.chart"
-                [dataLabels]="chartOptions.dataLabels"
-                [plotOptions]="chartOptions.plotOptions"
-                [yaxis]="chartOptions.yaxis"
-                [xaxis]="chartOptions.xaxis"
-                [fill]="chartOptions.fill"
-                [tooltip]="chartOptions.tooltip"
-                *ngIf="classCollection.length > 0"
-              ></apx-chart>
-              <div *ngIf="classCollection.length === 0 && !isLoading" class="flex flex-col items-center justify-center h-full text-secondary">
-                No collection data available
-              </div>
-            </div>
-          </div>
-        </mat-card>
-      </div>
-    </ng-container>
-  
   </div>
+
+  <!-- STATS STRIP -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 w-full">
+    @if (isLoading) {
+    @for (i of [1,2,3,4,5]; track i) {
+    <div class="bg-card shadow rounded-2xl p-6 border animate-pulse">
+      <div class="flex items-center">
+        <div class="w-6 h-6 bg-gray-200 rounded"></div>
+        <div class="ml-3 w-20 h-4 bg-gray-200 rounded"></div>
+      </div>
+      <div class="mt-4 w-32 h-8 bg-gray-200 rounded"></div>
+    </div>
+    }
+    } @else {
+    <!-- Card 1: Total Students -->
+    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center text-primary">
+          <mat-icon class="icon-size-5" svgIcon="heroicons_outline:academic-cap"></mat-icon>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">Students</div>
+        </div>
+        <div class="mt-4 flex items-baseline">
+          <div class="text-4xl font-extrabold leading-none tracking-tight">{{ stats?.total_students || 0 }}</div>
+          <div class="ml-2 text-sm font-medium text-secondary">Active</div>
+        </div>
+      </div>
+      <div class="bg-primary-500 h-1"></div>
+    </div>
+
+    <!-- Card 2: Collected Today -->
+    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center text-primary">
+          <mat-icon class="icon-size-5" svgIcon="heroicons_outline:banknotes"></mat-icon>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">Today</div>
+        </div>
+        <div class="mt-4 flex items-baseline truncate">
+          <div class="text-4xl font-extrabold leading-none tracking-tight">{{ (stats?.collected_today || 0) |
+            currency:'PKR':'symbol':'1.0-0' }}</div>
+          <div class="ml-2 text-sm font-medium text-secondary">Collected</div>
+        </div>
+      </div>
+      <div class="bg-primary-500 h-1"></div>
+    </div>
+
+    <!-- Card 3: Collected Month -->
+    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center text-primary">
+          <mat-icon class="icon-size-5" svgIcon="heroicons_outline:chart-bar"></mat-icon>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">This Month</div>
+        </div>
+        <div class="mt-4 flex items-baseline truncate">
+          <div class="text-4xl font-extrabold leading-none tracking-tight">{{ (stats?.collected_month || 0) |
+            currency:'PKR':'symbol':'1.0-0' }}</div>
+          <div class="ml-2 text-sm font-medium text-secondary">Collected</div>
+        </div>
+      </div>
+      <div class="bg-primary-500 h-1"></div>
+    </div>
+
+    <!-- Card 4: Pending -->
+    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center text-primary">
+          <mat-icon class="icon-size-5" svgIcon="heroicons_outline:clock"></mat-icon>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">Receivable</div>
+        </div>
+        <div class="mt-4 flex items-baseline truncate">
+          <div class="text-4xl font-extrabold leading-none tracking-tight">{{ (stats?.pending_amount || 0) |
+            currency:'PKR':'symbol':'1.0-0' }}</div>
+          <div class="ml-2 text-sm font-medium text-secondary">Pending</div>
+        </div>
+      </div>
+      <div class="bg-primary-500 h-1"></div>
+    </div>
+
+    <!-- Card 5: Defaulters -->
+    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center text-primary">
+          <mat-icon class="icon-size-5" svgIcon="heroicons_outline:exclamation-triangle"></mat-icon>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">Defaulters</div>
+        </div>
+        <div class="mt-4 flex items-baseline">
+          <div class="text-4xl font-extrabold leading-none tracking-tight">{{ stats?.defaulter_count || 0 }}</div>
+          <div class="ml-2 text-sm font-medium text-secondary">Students</div>
+        </div>
+      </div>
+      <div class="bg-primary-500 h-1"></div>
+    </div>
+    }
+  </div>
+
+  <!-- CHARTS GRID -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-8">
+
+    <!-- Weekly Collection Trend -->
+    <mat-card class="flex flex-col flex-auto shadow rounded-2xl border-none">
+      <div class="p-6 pb-0">
+        <div class="text-lg font-bold tracking-tight">Collection Trend</div>
+        <div class="text-secondary text-sm">Revenue flow over the last 7 days</div>
+      </div>
+      <div class="flex-auto pt-4 h-80">
+        @if (isLoading) {
+        <div class="px-6 space-y-4">
+          <div class="w-full h-64 bg-gray-100 rounded animate-pulse"></div>
+        </div>
+        } @else {
+        <apx-chart [series]="weeklyChartOptions.series" [chart]="weeklyChartOptions.chart"
+          [xaxis]="weeklyChartOptions.xaxis" [yaxis]="weeklyChartOptions.yaxis" [stroke]="weeklyChartOptions.stroke"
+          [fill]="weeklyChartOptions.fill" [colors]="weeklyChartOptions.colors" [tooltip]="weeklyChartOptions.tooltip"
+          [dataLabels]="weeklyChartOptions.dataLabels"></apx-chart>
+        }
+      </div>
+    </mat-card>
+
+    <!-- Class-wise Distribution -->
+    <mat-card class="flex flex-col flex-auto shadow rounded-2xl border-none">
+      <div class="p-6 pb-0">
+        <div class="text-lg font-bold tracking-tight">Fee Distribution</div>
+        <div class="text-secondary text-sm">Monthly collection spread across classes</div>
+      </div>
+      <div class="flex-auto pt-4 h-80">
+        @if (isLoading) {
+        <div class="px-6 space-y-4">
+          <div class="w-full h-64 bg-gray-100 rounded animate-pulse"></div>
+        </div>
+        } @else {
+        <apx-chart [series]="classChartOptions.series" [chart]="classChartOptions.chart"
+          [xaxis]="classChartOptions.xaxis" [yaxis]="classChartOptions.yaxis"
+          [plotOptions]="classChartOptions.plotOptions" [colors]="classChartOptions.colors"
+          [dataLabels]="classChartOptions.dataLabels" [tooltip]="classChartOptions.tooltip"></apx-chart>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- BOTTOM SECTION -->
+  <div class="grid grid-cols-1 gap-8 w-full mt-8">
+    <mat-card class="flex flex-col flex-auto shadow rounded-2xl border-none">
+      <div class="p-6 border-b">
+        <div class="text-lg font-bold tracking-tight">Real-time Transaction Ledger</div>
+        <div class="text-secondary text-sm">The most recent payments received from parents</div>
+      </div>
+      <div class="overflow-x-auto relative">
+        <table mat-table [dataSource]="recentPayments" class="w-full border-separate border-spacing-0 bg-transparent">
+          <ng-container matColumnDef="receipt_no">
+            <th mat-header-cell *matHeaderCellDef
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Receipt </th>
+            <td mat-cell *matCellDef="let element" class="py-4">
+              <span
+                class="font-mono text-xs font-bold bg-gray-100 px-2 py-1 rounded text-primary border">{{element.receipt_no}}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="student_name">
+            <th mat-header-cell *matHeaderCellDef
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Billed Student </th>
+            <td mat-cell *matCellDef="let element" class="py-4">
+              <div class="font-bold text-primary">{{element.invoice?.student?.name}}</div>
+              <div class="text-xs text-secondary">{{element.invoice?.student?.roll_no}}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Amount </th>
+            <td mat-cell *matCellDef="let element" class="font-extrabold text-primary">
+              {{element.amount_paid | currency:'PKR':'symbol':'1.0-0'}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="payment_method">
+            <th mat-header-cell *matHeaderCellDef
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Channel </th>
+            <td mat-cell *matCellDef="let element">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {{element.payment_method}}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="payment_date">
+            <th mat-header-cell *matHeaderCellDef
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Timestamp </th>
+            <td mat-cell *matCellDef="let element" class="text-secondary text-sm">
+              {{element.payment_date | date:'mediumDate'}}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            class="hover:bg-gray-50 transition-colors group cursor-pointer"
+            [routerLink]="['/fee/invoices', row.invoice_id]"></tr>
+        </table>
+
+        @if (recentPayments.length === 0 && !isLoading) {
+        <div class="p-16 text-center">
+          <mat-icon class="icon-size-12 text-hint" svgIcon="heroicons_outline:circle-stack"></mat-icon>
+          <div class="mt-2 font-bold text-secondary text-xl font-medium tracking-tight">No live transactions found</div>
+        </div>
+        }
+
+        <!-- SKELETON FOR TABLE -->
+        @if (isLoading) {
+        <div class="p-4 space-y-4">
+          @for (i of [1,2,3]; track i) {
+          <div class="flex items-center space-x-4 animate-pulse">
+            <div class="w-24 h-4 bg-gray-100 rounded"></div>
+            <div class="flex-1 h-4 bg-gray-100 rounded"></div>
+            <div class="w-32 h-4 bg-gray-100 rounded"></div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+</div>

@@ -1,99 +1,132 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { ApiService } from 'app/core/services/api.service';
 
 @Component({
-    selector: 'app-payment-list',
-    standalone: true,
-    imports: [
-        CommonModule,
-        MatTableModule,
-        MatIconModule,
-        MatSnackBarModule,
-        MatProgressSpinnerModule,
-        CurrencyPipe,
-        DatePipe,
-        TitleCasePipe
-    ],
-    template: `
-    <div class="flex flex-col flex-auto min-w-0 p-8 pt-10">
-      <div class="flex items-center justify-between w-full mb-8">
-        <div>
-          <div class="text-3xl font-semibold tracking-tight leading-8">Payments Repository</div>
-          <div class="font-medium tracking-tight text-secondary">History of all fee payments received</div>
-        </div>
-      </div>
-
-      <div class="flex flex-col flex-auto overflow-hidden bg-card shadow rounded-2xl">
-        <div class="overflow-x-auto relative">
-          <table mat-table [dataSource]="dataSource" class="w-full min-w-max">
-            
-            <ng-container matColumnDef="receipt_no">
-              <th mat-header-cell *matHeaderCellDef> Receipt No. </th>
-              <td mat-cell *matCellDef="let element" class="font-medium text-blue-600"> {{element.receipt_no}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="invoice_no">
-              <th mat-header-cell *matHeaderCellDef> Source Invoice </th>
-              <td mat-cell *matCellDef="let element"> {{element.fee_invoice?.invoice_no || element.invoice_id}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="student_name">
-              <th mat-header-cell *matHeaderCellDef> Student </th>
-              <td mat-cell *matCellDef="let element"> {{element.student?.name}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="amount_paid">
-              <th mat-header-cell *matHeaderCellDef> Amount Paid </th>
-              <td mat-cell *matCellDef="let element" class="font-semibold text-green-600"> {{element.amount_paid | currency:'PKR':'symbol':'1.2-2'}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="method">
-              <th mat-header-cell *matHeaderCellDef> Method </th>
-              <td mat-cell *matCellDef="let element"> {{element.payment_method | titlecase}} </td>
-            </ng-container>
-            
-            <ng-container matColumnDef="payment_date">
-              <th mat-header-cell *matHeaderCellDef> Date </th>
-              <td mat-cell *matCellDef="let element"> {{element.payment_date | date:'dd MMM yyyy'}} </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
-          </table>
-
-          <div *ngIf="isLoading" class="p-8 text-center text-hint">
-            <mat-spinner diameter="32" class="mx-auto mb-4"></mat-spinner>
-            Loading payments...
-          </div>
-          <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center">
-            <mat-icon svgIcon="heroicons_outline:credit-card" class="icon-size-12 text-hint mb-4"></mat-icon>
-            <div class="text-lg font-medium text-secondary">No payments tracked yet.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  selector: 'app-payment-list',
+  templateUrl: './payment-list.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    CurrencyPipe,
+    DatePipe,
+    TitleCasePipe
+  ]
 })
 export class PaymentListComponent implements OnInit {
-    private _apiService = inject(ApiService);
+  private _apiService = inject(ApiService);
+  private _fb = inject(FormBuilder);
 
-    displayedColumns = ['receipt_no', 'invoice_no', 'student_name', 'amount_paid', 'method', 'payment_date'];
-    dataSource = new MatTableDataSource<any>([]);
-    isLoading = true;
+  filterForm: FormGroup;
+  displayedColumns = ['student', 'receipt_no', 'invoice', 'amount', 'method', 'date'];
+  dataSource = new MatTableDataSource<any>([]);
+  isLoading = true;
 
-    ngOnInit() {
-        this._apiService.getRecentPayments().subscribe({
-            next: (res) => {
-                this.dataSource.data = res;
-                this.isLoading = false;
-            },
-            error: () => this.isLoading = false
-        });
-    }
+  // Pagination
+  totalRecords = 0;
+  pageSize = 25;
+  currentPage = 1;
+
+  // Stats
+  stats: any = {
+    total_amount: 0,
+    count: 0
+  };
+
+  // Filter Data
+  classes: any[] = [];
+  months = [
+    { label: 'January', value: 1 }, { label: 'February', value: 2 },
+    { label: 'March', value: 3 }, { label: 'April', value: 4 },
+    { label: 'May', value: 5 }, { label: 'June', value: 6 },
+    { label: 'July', value: 7 }, { label: 'August', value: 8 },
+    { label: 'September', value: 9 }, { label: 'October', value: 10 },
+    { label: 'November', value: 11 }, { label: 'December', value: 12 }
+  ];
+  years: number[] = [];
+
+  methodIcons = {
+    'cash': 'heroicons_outline:banknotes',
+    'bank_transfer': 'heroicons_outline:building-library',
+    'cheque': 'heroicons_outline:envelope',
+    'online': 'heroicons_outline:globe-alt'
+  };
+
+  ngOnInit() {
+    const today = new Date();
+    this.years = [today.getFullYear(), today.getFullYear() - 1, today.getFullYear() - 2];
+
+    this.filterForm = this._fb.group({
+      search: [''],
+      class_id: [null],
+      month: [today.getMonth() + 1],
+      year: [today.getFullYear()]
+    });
+
+    this.loadClasses();
+    this.loadPayments();
+
+    // Listen for filter changes
+    this.filterForm.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.loadPayments();
+    });
+  }
+
+  loadClasses() {
+    this._apiService.getClasses().subscribe(res => this.classes = res);
+  }
+
+  loadPayments() {
+    this.isLoading = true;
+    const params = {
+      page: this.currentPage,
+      per_page: this.pageSize,
+      ...this.filterForm.getRawValue()
+    };
+
+    this._apiService.getPayments(params).subscribe({
+      next: (res: any) => {
+        this.dataSource.data = res.payments.data;
+        this.totalRecords = res.payments.total;
+        this.stats = res.stats;
+        this.isLoading = false;
+      },
+      error: () => this.isLoading = false
+    });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadPayments();
+  }
+
+  getSelectedMonthLabel(): string {
+    const month = this.months.find(m => m.value === this.filterForm?.get('month')?.value);
+    return month ? month.label : '';
+  }
 }

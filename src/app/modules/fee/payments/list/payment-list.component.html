@@ -1,0 +1,172 @@
+<div class="flex flex-col flex-auto min-w-0 p-8 pt-10 bg-gray-50/50">
+
+    <!-- Header & Statistics -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-8">
+        <div>
+            <div class="text-3xl font-semibold tracking-tight leading-8">Payments Repository</div>
+            <div class="font-medium tracking-tight text-secondary">Advanced tracking and financial auditing</div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
+        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl border-l-4 border-primary overflow-hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                    <div class="text-sm font-medium text-secondary uppercase tracking-wider">Total Fee Collected in
+                        {{ getSelectedMonthLabel() }} {{ filterForm.value.year }}</div>
+                    <div class="text-3xl font-bold mt-1">{{ stats?.total_amount | currency:'PKR':'symbol':'1.0-0' }}
+                    </div>
+                </div>
+                <div class="p-3 bg-primary-50 rounded-full">
+                    <mat-icon class="icon-size-8 text-primary" svgIcon="heroicons_outline:banknotes"></mat-icon>
+                </div>
+            </div>
+            <div class="flex items-center mt-4 text-xs font-medium text-secondary">
+                <span class="text-green-600 font-bold mr-1">{{ stats?.count }}</span>
+                <span>Total Transactions</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-card shadow rounded-2xl mb-8 p-6">
+        <form [formGroup]="filterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Search Receipt or Student</mat-label>
+                <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass" class="icon-size-5 mr-2"></mat-icon>
+                <input matInput formControlName="search" placeholder="Enter keywords...">
+            </mat-form-field>
+
+            <!-- Class Filter -->
+            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Class</mat-label>
+                <mat-select formControlName="class_id">
+                    <mat-option [value]="null">All Classes</mat-option>
+                    <mat-option *ngFor="let class of classes" [value]="class.id">
+                        {{ class.name }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Month Filter -->
+            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Month</mat-label>
+                <mat-select formControlName="month">
+                    <mat-option *ngFor="let m of months" [value]="m.value">
+                        {{ m.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Year Filter -->
+            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Year</mat-label>
+                <mat-select formControlName="year">
+                    <mat-option *ngFor="let y of years" [value]="y">
+                        {{ y }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="flex flex-col flex-auto overflow-hidden bg-card shadow rounded-2xl border">
+        <div class="overflow-x-auto relative min-h-64">
+            <table mat-table [dataSource]="dataSource" class="w-full min-w-max border-separate border-spacing-0">
+
+                <ng-container matColumnDef="student">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Student Info </th>
+                    <td mat-cell *matCellDef="let element">
+                        <div class="flex flex-col py-3">
+                            <span class="font-semibold text-gray-800">{{element.invoice?.student?.name}}</span>
+                            <span class="text-xs text-secondary">{{element.invoice?.student?.class?.name}} (Roll:
+                                {{element.invoice?.student?.roll_no}})</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="receipt_no">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Receipt No. </th>
+                    <td mat-cell *matCellDef="let element" class="font-bold text-primary"> {{element.receipt_no}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoice">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Billing Month
+                    </th>
+                    <td mat-cell *matCellDef="let element">
+                        <span class="px-2.5 py-1 rounded bg-gray-100 text-gray-700 font-medium text-xs">
+                            {{element.invoice?.month}}/{{element.invoice?.year}}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Amount Paid </th>
+                    <td mat-cell *matCellDef="let element">
+                        <span class="font-extrabold text-primary text-lg">
+                            {{element.amount_paid | currency:'PKR':'symbol':'1.0-0'}}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="method">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Payment Method
+                    </th>
+                    <td mat-cell *matCellDef="let element">
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-4 mr-2" [ngClass]="{
+                                'text-green-600': element.payment_method === 'cash',
+                                'text-blue-600': element.payment_method === 'bank_transfer',
+                                'text-purple-600': element.payment_method === 'online',
+                                'text-orange-600': element.payment_method === 'cheque'
+                            }"
+                                [svgIcon]="methodIcons[element.payment_method] || 'heroicons_outline:credit-card'"></mat-icon>
+                            <span class="text-sm font-medium">{{element.payment_method | titlecase}}</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef
+                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Received At </th>
+                    <td mat-cell *matCellDef="let element" class="text-secondary text-sm">
+                        {{element.payment_date | date:'dd MMM, yyyy'}}
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                    class="hover:bg-gray-50 transition-colors cursor-pointer group"></tr>
+            </table>
+
+            <div *ngIf="isLoading"
+                class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex flex-col items-center justify-center z-10">
+                <mat-spinner diameter="40"></mat-spinner>
+                <span class="mt-4 font-medium text-secondary">Synchronizing financial records...</span>
+            </div>
+
+            <div *ngIf="!isLoading && dataSource.data.length === 0"
+                class="flex flex-col items-center justify-center p-24 text-center">
+                <div class="p-6 bg-gray-100 rounded-full mb-4">
+                    <mat-icon svgIcon="heroicons_outline:document-magnifying-glass"
+                        class="icon-size-16 text-hint"></mat-icon>
+                </div>
+                <div class="text-2xl font-bold tracking-tight text-secondary">No payments tracked for this criteria
+                </div>
+                <div class="mt-1 text-secondary max-w-xs">Adjust your filters or try a different search term to find the
+                    records you're looking for.</div>
+            </div>
+        </div>
+
+        <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)" class="border-t bg-gray-50"></mat-paginator>
+    </div>
+</div>

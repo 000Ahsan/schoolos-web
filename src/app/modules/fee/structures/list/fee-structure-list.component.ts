@@ -1,106 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 
 import { ApiService } from 'app/core/services/api.service';
-
-@Component({
-    selector: 'app-fee-structure-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDialogModule
-    ],
-    template: `
-    <h2 mat-dialog-title>Add Fee Structure</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form" class="flex flex-col gap-4 pt-4">
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Academic Year</mat-label>
-          <mat-select formControlName="academic_year_id" required>
-            <mat-option *ngFor="let year of academicYears" [value]="year.id">{{ year.name }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Target Classes</mat-label>
-          <mat-select formControlName="classes" multiple required>
-            <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Fee Head Name</mat-label>
-          <input matInput formControlName="fee_head_name" placeholder="e.g. Tuition Fee" required>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Amount (PKR)</mat-label>
-          <input matInput type="number" formControlName="amount" required min="1">
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Period</mat-label>
-          <mat-select formControlName="period" required>
-            <mat-option value="monthly">Monthly</mat-option>
-            <mat-option value="yearly">Yearly</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">Save</button>
-    </mat-dialog-actions>
-  `
-})
-export class FeeStructureDialogComponent implements OnInit {
-    form: FormGroup;
-    private _fb = inject(FormBuilder);
-    private _dialogRef = inject(MatDialogRef<FeeStructureDialogComponent>);
-    private _apiService = inject(ApiService);
-
-    academicYears: any[] = [];
-    classesList: any[] = [];
-
-    constructor() {
-        this.form = this._fb.group({
-            academic_year_id: [null, Validators.required],
-            classes: [[], Validators.required], // Array of class IDs
-            fee_head_name: ['', Validators.required],
-            amount: [null, [Validators.required, Validators.min(1)]],
-            period: ['monthly', Validators.required]
-        });
-    }
-
-    ngOnInit() {
-        // Ideally we pass these in via MAT_DIALOG_DATA or fetch them here. Fetching here for simplicity in MVP.
-        this._apiService.getAcademicYears().subscribe(res => this.academicYears = res);
-        this._apiService.getClasses().subscribe(res => this.classesList = res);
-    }
-
-    save() {
-        if (this.form.valid) {
-            this._dialogRef.close(this.form.value);
-        }
-    }
-}
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector: 'app-fee-structure-list',
@@ -113,23 +26,51 @@ export class FeeStructureDialogComponent implements OnInit {
         MatDialogModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        MatSidenavModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        ReactiveFormsModule,
         CurrencyPipe
     ],
     templateUrl: './fee-structure-list.component.html'
 })
 export class FeeStructureListComponent implements OnInit {
     private _apiService = inject(ApiService);
-    private _dialog = inject(MatDialog);
     private _snackBar = inject(MatSnackBar);
+    private _fb = inject(FormBuilder);
+    private _fuseConfirmationService = inject(FuseConfirmationService);
+
+    @ViewChild('drawer') drawer: MatDrawer;
 
     displayedColumns = ['academic_year', 'fee_head_name', 'amount', 'period', 'classes_applied', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
     isLoading = true;
+    isSaving = false;
+    
+    academicYears: any[] = [];
+    classesList: any[] = [];
+    selectedId: number | null = null;
+    form: FormGroup;
 
-    constructor() { }
+    constructor() {
+        this.form = this._fb.group({
+            academic_year_id: [null, Validators.required],
+            classes: [[], Validators.required], // Array of class IDs
+            fee_head_name: ['', Validators.required],
+            amount: [null, [Validators.required, Validators.min(1)]],
+            period: ['monthly', Validators.required]
+        });
+    }
 
     ngOnInit() {
         this.loadStructures();
+        this.loadMetaData();
+    }
+
+    loadMetaData() {
+        this._apiService.getAcademicYears().subscribe(res => this.academicYears = res);
+        this._apiService.getClasses().subscribe(res => this.classesList = res);
     }
 
     loadStructures() {
@@ -146,17 +87,75 @@ export class FeeStructureListComponent implements OnInit {
         });
     }
 
-    openAddDialog() {
-        const dialogRef = this._dialog.open(FeeStructureDialogComponent, { width: '500px' });
+    openDrawer(mode: 'add' | 'edit', structure?: any) {
+        if (mode === 'add') {
+            this.selectedId = null;
+            this.form.reset({ period: 'monthly' });
+            // Set current academic year if available
+            const currentYear = this.academicYears.find(y => y.is_current);
+            if (currentYear) {
+                this.form.patchValue({ academic_year_id: currentYear.id });
+            }
+        } else {
+            this.selectedId = structure.id;
+            this.form.patchValue({
+                academic_year_id: structure.academic_year_id,
+                fee_head_name: structure.fee_head_name,
+                amount: structure.amount,
+                period: structure.period,
+                classes: structure.classes?.map(c => c.id) || []
+            });
+        }
+        this.drawer.open();
+    }
 
-        dialogRef.afterClosed().subscribe(res => {
-            if (res) {
-                this._apiService.createFeeStructure(res).subscribe({
+    closeDrawer() {
+        this.drawer.close();
+    }
+
+    save() {
+        if (this.form.invalid) return;
+        this.isSaving = true;
+
+        const request = this.selectedId
+            ? this._apiService.updateFeeStructure(this.selectedId, this.form.value)
+            : this._apiService.createFeeStructure(this.form.value);
+
+        request.subscribe({
+            next: () => {
+                this._snackBar.open(`Fee structure ${this.selectedId ? 'updated' : 'created'} successfully`, 'Close', { duration: 3000 });
+                this.isSaving = false;
+                this.closeDrawer();
+                this.loadStructures();
+            },
+            error: () => {
+                this.isSaving = false;
+                this._snackBar.open('Error saving fee structure', 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    deleteStructure(structure: any) {
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Delete Fee Structure',
+            message: `Are you sure you want to delete ${structure.fee_head_name}? This might affect future invoice generation for linked classes.`,
+            actions: {
+                confirm: {
+                    label: 'Delete',
+                    color: 'warn'
+                }
+            }
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                // Assuming deleteFeeStructure exists in ApiService, adding it just in case
+                this._apiService.deleteFeeStructure(structure.id).subscribe({
                     next: () => {
-                        this._snackBar.open('Fee structure created successfully', 'Close', { duration: 3000 });
+                        this._snackBar.open('Fee structure deleted successfully', 'Close', { duration: 3000 });
                         this.loadStructures();
                     },
-                    error: () => this._snackBar.open('Error creating fee structure', 'Close', { duration: 3000 })
+                    error: () => this._snackBar.open('Error deleting fee structure', 'Close', { duration: 3000 })
                 });
             }
         });

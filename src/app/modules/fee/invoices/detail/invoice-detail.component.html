@@ -1,131 +1,303 @@
-<div class="flex flex-col flex-auto min-w-0 print:m-0 print:p-0">
+<mat-drawer-container class="absolute inset-0 flex-auto h-full bg-card dark:bg-transparent" [hasBackdrop]="true">
 
-    <!-- Header Section (Hidden on Print) -->
-    <div class="bg-card px-8 pt-10 pb-6 border-b print:hidden">
-        <div class="flex items-center mb-4 text-secondary cursor-pointer hover:text-primary transition-colors"
-            [routerLink]="['/fee/invoices']">
-            <mat-icon class="icon-size-5" svgIcon="heroicons_outline:arrow-left"></mat-icon>
-            <span class="ml-2 font-medium">Back to Invoices</span>
-        </div>
-
-        <div class="flex items-center justify-between">
-            <div class="text-3xl font-semibold tracking-tight leading-8">Invoice {{ invoice?.invoice_no }}</div>
-            <div class="flex items-center space-x-4">
-                <button mat-stroked-button (click)="printInvoice()">
-                    <mat-icon svgIcon="heroicons_outline:printer" class="icon-size-5"></mat-icon>
-                    <span class="ml-2">Print</span>
+    <!-- Drawer -->
+    <mat-drawer class="w-full sm:w-128 dark:bg-gray-900" [mode]="'over'" [opened]="false" [position]="'end'" #drawer>
+        <div class="flex flex-col h-full bg-card">
+            <!-- Drawer Header -->
+            <div class="flex items-center justify-between p-6 border-b bg-gray-50">
+                <div class="flex flex-col">
+                    <div class="text-2xl font-bold tracking-tight">Record Payment</div>
+                    <div class="text-secondary font-medium uppercase text-xs tracking-wider mt-1">Voucher: {{
+                        voucher?.invoice_no }}</div>
+                </div>
+                <button mat-icon-button (click)="drawer.close()">
+                    <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
                 </button>
-                <button mat-flat-button color="primary" *ngIf="invoice?.status !== 'paid' && invoice?.status !== 'void'"
-                    (click)="openPaymentDialog()">
-                    Receive Payment
+            </div>
+
+            <!-- Drawer Content (Scrollable) -->
+            <div class="flex-auto overflow-y-auto p-8 min-h-0">
+                <form [formGroup]="paymentForm" class="flex flex-col gap-6">
+
+                    <div class="p-4 bg-primary-50 rounded-lg border border-primary-100 mb-2">
+                        <div class="text-primary-700 font-semibold text-lg">Balance Due: {{ voucher?.balance |
+                            currency:'PKR':'symbol':'1.0-0' }}</div>
+                        <div class="text-primary-600 text-sm italic">Enter the amount received from the guardian.</div>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Amount to Receive</mat-label>
+                        <input matInput type="number" formControlName="amount_paid" required min="1">
+                        <mat-icon matPrefix class="icon-size-5 mr-2" svgIcon="heroicons_outline:banknotes"></mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Payment Method</mat-label>
+                        <mat-select formControlName="payment_method" required>
+                            <mat-option value="cash">
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 mr-3"
+                                        svgIcon="heroicons_outline:currency-dollar"></mat-icon>
+                                    <span>Cash</span>
+                                </div>
+                            </mat-option>
+                            <mat-option value="bank_transfer">
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 mr-3"
+                                        svgIcon="heroicons_outline:building-library"></mat-icon>
+                                    <span>Bank Transfer</span>
+                                </div>
+                            </mat-option>
+                            <mat-option value="cheque">
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 mr-3" svgIcon="heroicons_outline:envelope"></mat-icon>
+                                    <span>Cheque</span>
+                                </div>
+                            </mat-option>
+                            <mat-option value="online">
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-5 mr-3" svgIcon="heroicons_outline:globe-alt"></mat-icon>
+                                    <span>Online Payment</span>
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Payment Date</mat-label>
+                        <input matInput [matDatepicker]="datePicker" formControlName="payment_date" required>
+                        <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #datePicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Remarks / Reference No</mat-label>
+                        <textarea matInput formControlName="remarks" rows="3"
+                            placeholder="e.g. Transaction ID, Cheque No..."></textarea>
+                    </mat-form-field>
+
+                </form>
+            </div>
+
+            <!-- Drawer Footer (Fixed at bottom) -->
+            <div class="flex items-center justify-end p-6 border-t bg-gray-50">
+                <button mat-button (click)="drawer.close()" class="mr-4">Cancel</button>
+                <button mat-flat-button color="primary" [disabled]="paymentForm.invalid || isSubmittingPayment"
+                    (click)="submitPayment()">
+                    <span *ngIf="!isSubmittingPayment">Confirm & Receive</span>
+                    <mat-progress-spinner *ngIf="isSubmittingPayment" [diameter]="20"
+                        [mode]="'indeterminate'"></mat-progress-spinner>
                 </button>
             </div>
         </div>
-    </div>
+    </mat-drawer>
 
-    <div class="flex items-center justify-center p-8" *ngIf="isLoading">
-        <mat-spinner diameter="40"></mat-spinner>
-    </div>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto min-w-0 print:m-0 print:p-0">
 
-    <!-- A4 Printable Area -->
-    <div class="p-8 flex items-center justify-center bg-gray-50 flex-auto print:p-0 print:bg-white w-full"
-        *ngIf="!isLoading && invoice">
-
-        <mat-card
-            class="w-full max-w-4xl shadow rounded-2xl overflow-hidden print:max-w-none print:shadow-none print:rounded-none">
-            <div class="p-8 sm:p-16">
-
-                <!-- School Header -->
-                <div class="flex items-start justify-between border-b pb-8">
-                    <div>
-                        <div class="text-4xl font-bold tracking-tight">SchoolOS Academy</div>
-                        <div class="text-secondary mt-1">123 Education Boulevard, Knowledge City</div>
-                        <div class="text-secondary">+92 300 1234567 | info&#64;schoolosacademy.com</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-4xl font-semibold tracking-tight text-gray-400 uppercase">Invoice</div>
-                        <div class="mt-2 text-lg">No: <strong>{{ invoice.invoice_no }}</strong></div>
-                        <div class="text-secondary">Billing Month: {{ invoice.billing_month }}</div>
-                        <div class="text-secondary">Due Date: {{ invoice.due_date | date:'longDate' }}</div>
-                    </div>
+            <!-- Header Section (Hidden on Print) -->
+            <div class="bg-card px-8 pt-10 pb-6 border-b print:hidden">
+                <div class="flex items-center mb-4 text-secondary cursor-pointer hover:text-primary transition-colors"
+                    [routerLink]="['/fee/invoices']">
+                    <mat-icon class="icon-size-5" svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                    <span class="ml-2 font-medium">Back to Vouchers</span>
                 </div>
 
-                <!-- Student Info -->
-                <div class="flex items-start justify-between mt-8">
-                    <div>
-                        <div class="text-lg font-medium text-secondary">Billed To:</div>
-                        <div class="text-2xl font-semibold">{{ invoice.student?.name }}</div>
-                        <div class="text-secondary mt-1">Roll No: {{ invoice.student?.roll_no }}</div>
-                        <div class="text-secondary">Class {{ invoice.student?.class_id }}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-lg font-medium text-secondary">Status:</div>
-                        <div class="mt-1">
-                            <span
-                                class="inline-flex items-center px-4 py-1 rounded-full text-base font-semibold uppercase tracking-wider"
-                                [ngClass]="{
-                  'bg-green-100 text-green-800': invoice.status === 'paid',
-                  'bg-yellow-100 text-yellow-800': invoice.status === 'partial',
-                  'bg-red-100 text-red-800': invoice.status === 'unpaid',
-                  'bg-gray-100 text-gray-800': invoice.status === 'void'
-                }">{{ invoice.status }}</span>
-                        </div>
+                <div class="flex items-center justify-between">
+                    <div class="text-3xl font-semibold tracking-tight leading-8">Voucher {{ voucher?.invoice_no }}</div>
+                    <div class="flex items-center space-x-4">
+                        <button mat-stroked-button (click)="printVoucher()">
+                            <mat-icon svgIcon="heroicons_outline:printer" class="icon-size-5"></mat-icon>
+                            <span class="ml-2">Print</span>
+                        </button>
+                        <button mat-stroked-button (click)="sendWhatsApp()" [disabled]="isSendingWhatsApp">
+                            <mat-icon svgIcon="heroicons_outline:chat-bubble-left-right"
+                                class="icon-size-5 text-green-600"></mat-icon>
+                            <span class="ml-2">WhatsApp</span>
+                        </button>
+                        <button mat-flat-button color="primary"
+                            *ngIf="voucher?.status !== 'paid' && voucher?.status !== 'void'"
+                            (click)="openPaymentDrawer()">
+                            Receive Payment
+                        </button>
                     </div>
                 </div>
-
-                <!-- Line Items -->
-                <div class="mt-12 overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="border-b-2 font-medium text-secondary">
-                                <th class="py-3 px-2">Description</th>
-                                <th class="py-3 px-2 text-right">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Base Fees -->
-                            <tr class="border-b" *ngFor="let item of invoice.line_items">
-                                <td class="py-4 px-2">{{ item.fee_head_name }}</td>
-                                <td class="py-4 px-2 text-right">{{ item.amount | currency:'PKR':'symbol':'1.2-2' }}
-                                </td>
-                            </tr>
-                            <!-- Applicable Discounts -->
-                            <tr class="border-b text-red-500" *ngFor="let disc of invoice.applied_discounts">
-                                <td class="py-4 px-2">Discount ({{ disc.discount_name }})</td>
-                                <td class="py-4 px-2 text-right">-{{ disc.amount | currency:'PKR':'symbol':'1.2-2' }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Totals -->
-                <div class="flex justify-end mt-8">
-                    <div class="w-1/2">
-                        <div class="flex justify-between py-2">
-                            <span class="font-medium text-secondary">Subtotal:</span>
-                            <span>{{ invoice.total_amount | currency:'PKR':'symbol':'1.2-2' }}</span>
-                        </div>
-                        <div class="flex justify-between py-2">
-                            <span class="font-medium text-secondary">Amount Paid:</span>
-                            <span class="text-green-600">{{ invoice.amount_paid | currency:'PKR':'symbol':'1.2-2'
-                                }}</span>
-                        </div>
-                        <div class="flex justify-between py-4 mt-2 border-t-2 text-2xl font-semibold">
-                            <span>Balance Due:</span>
-                            <span [class.text-red-600]="(invoice.total_amount - invoice.amount_paid) > 0">
-                                {{ (invoice.total_amount - invoice.amount_paid) | currency:'PKR':'symbol':'1.2-2' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="mt-16 pt-8 border-t text-sm text-secondary text-center">
-                    Please pay your invoice by the due date to avoid late fees. Thank you for your business.
-                </div>
-
             </div>
-        </mat-card>
-    </div>
-</div>
+
+            <div class="flex items-center justify-center p-8" *ngIf="isLoading">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <!-- A4 Printable Area -->
+            <div class="p-8 flex items-center justify-center bg-gray-50 flex-auto print:p-0 print:bg-white w-full"
+                *ngIf="!isLoading && voucher">
+
+                <mat-card
+                    class="w-full max-w-4xl shadow rounded-2xl overflow-hidden print:max-w-none print:shadow-none print:rounded-none">
+                    <div class="p-8 sm:p-16">
+
+                        <!-- School Header -->
+                        <div class="flex items-start justify-between border-b pb-8">
+                            <div class="flex items-center">
+                                <div *ngIf="schoolSettings?.logo_url" class="mr-6">
+                                    <img [src]="schoolSettings.logo_url" class="w-48 h-48 object-contain" />
+                                </div>
+                                <div>
+                                    <div class="text-4xl font-bold tracking-tight text-primary">{{
+                                        schoolSettings?.school_name
+                                        || 'SchoolOS Academy' }}</div>
+                                    <div class="text-secondary mt-1 max-w-md">{{ schoolSettings?.address }}</div>
+                                    <div class="text-secondary">{{ schoolSettings?.phone }} | {{ schoolSettings?.email
+                                        }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start justify-between border-b pb-8 mt-8">
+                            <div>
+                                <div class="text-4xl font-semibold tracking-tight text-gray-400 uppercase">Fee Voucher
+                                </div>
+                                <div class="mt-2 text-lg">No: <strong>{{ voucher.invoice_no }}</strong></div>
+                                <div class="text-secondary font-medium">Billing Month: {{ voucher.month }}/{{
+                                    voucher.year }}
+                                </div>
+                                <div class="text-secondary">Due Date: {{ voucher.due_date | date:'longDate' }}</div>
+                            </div>
+
+                            <div>
+                                <div class="text-lg font-medium text-secondary italic">Student:</div>
+                                <div class="text-2xl font-semibold">{{ voucher.student?.name }}</div>
+                                <div class="flex flex-col text-secondary mt-1">
+                                    <span>Roll No: {{ voucher.student?.roll_no }}</span>
+                                    <span>Class: {{ voucher.student?.class?.name }} {{ voucher.student?.section?.name
+                                        }}</span>
+                                    <span *ngIf="voucher.student?.guardian_name">Guardian: {{
+                                        voucher.student.guardian_name
+                                        }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-lg font-medium text-secondary italic">Status:</div>
+                                    <div class="mt-1">
+                                        <span
+                                            class="inline-flex items-center px-4 py-1 rounded-full text-base font-semibold uppercase tracking-wider border-2"
+                                            [ngClass]="{
+                                                'bg-green-50 text-green-700 border-green-200': voucher.status === 'paid',
+                                                'bg-yellow-50 text-yellow-700 border-yellow-200': voucher.status === 'pending',
+                                                'bg-blue-50 text-blue-700 border-blue-200': voucher.status === 'partial',
+                                                'bg-red-50 text-red-700 border-red-200': voucher.status === 'overdue'
+                                            }">{{ voucher.status }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Line Items -->
+                        <div class="mt-12 overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="border-b-2 font-medium text-secondary">
+                                        <th class="py-3 px-2">Description</th>
+                                        <th class="py-3 px-2 text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Current Charges -->
+                                    <tr class="border-b">
+                                        <td class="py-4 px-2">
+                                            <div class="font-medium">Current Monthly Charges</div>
+                                            <div class="text-xs text-secondary italic">Tuition and standard monthly fees
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-2 text-right">{{ voucher.current_charges |
+                                            currency:'PKR':'symbol':'1.0-0' }}</td>
+                                    </tr>
+
+                                    <!-- Arrears -->
+                                    <tr class="border-b text-red-600" *ngIf="voucher.arrears > 0">
+                                        <td class="py-4 px-2">
+                                            <div class="font-medium">Outstanding Arrears (Previous Balance)</div>
+                                        </td>
+                                        <td class="py-4 px-2 text-right">{{ voucher.arrears |
+                                            currency:'PKR':'symbol':'1.0-0' }}
+                                        </td>
+                                    </tr>
+
+                                    <!-- Applied Discounts Breakdown -->
+                                    <ng-container *ngIf="voucher.discount_amount > 0">
+                                        <tr class="border-b text-blue-600 italic bg-blue-50/20"
+                                            *ngFor="let d of voucher.discount_breakdown">
+                                            <td class="py-3 px-2">
+                                                <div class="flex items-center">
+                                                    <mat-icon class="icon-size-4 mr-2"
+                                                        svgIcon="heroicons_outline:ticket"></mat-icon>
+                                                    <span class="font-medium text-sm">{{ d.name }}</span>
+                                                    <span class="ml-2 text-xs opacity-75">
+                                                        ({{ d.type === 'percentage' ? d.value + '%' :
+                                                        (schoolSettings?.currency || 'PKR') + ' ' + d.value }})
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-2 text-right text-sm">-{{ d.amount |
+                                                currency:'PKR':'symbol':'1.0-0' }}</td>
+                                        </tr>
+                                        <tr class="border-b text-blue-700 font-bold bg-blue-50/50">
+                                            <td class="py-2 px-2 text-xs uppercase tracking-wider">Total Discounts</td>
+                                            <td class="py-2 px-2 text-right">-{{ voucher.discount_amount |
+                                                currency:'PKR':'symbol':'1.0-0' }}</td>
+                                        </tr>
+                                    </ng-container>
+
+                                    <!-- Fine -->
+                                    <tr class="border-b text-orange-600" *ngIf="voucher.fine > 0">
+                                        <td class="py-4 px-2">
+                                            <div class="font-medium">Late Payment Fine</div>
+                                        </td>
+                                        <td class="py-4 px-2 text-right">{{ voucher.fine |
+                                            currency:'PKR':'symbol':'1.0-0' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totals -->
+                        <div class="flex justify-end mt-8">
+                            <div class="w-full sm:w-1/2">
+                                <div class="flex justify-between py-2 border-b">
+                                    <span class="font-medium text-secondary">Total Payable Amount:</span>
+                                    <span class="font-bold">{{ voucher.net_amount | currency:'PKR':'symbol':'1.0-0'
+                                        }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b">
+                                    <span class="font-medium text-secondary">Received Amount:</span>
+                                    <span class="text-green-600 font-bold">{{ voucher.amount_paid |
+                                        currency:'PKR':'symbol':'1.0-0' }}</span>
+                                </div>
+                                <div
+                                    class="flex justify-between py-4 mt-2 bg-gray-50 px-4 rounded-lg text-2xl font-extrabold border-2 border-gray-200">
+                                    <span>Balance Due:</span>
+                                    <span [class.text-red-600]="voucher.balance > 0"
+                                        [class.text-green-600]="voucher.balance <= 0">
+                                        {{ voucher.balance | currency:'PKR':'symbol':'1.0-0' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="mt-16 pt-8 border-t text-sm text-secondary text-center">
+                            <div class="font-bold text-gray-800 mb-1 italic">Notice:</div>
+                            Please pay your voucher by {{ voucher.due_date | date:'mediumDate' }} to avoid late payment
+                            charges
+                            of
+                            {{ schoolSettings?.currency }} {{ schoolSettings?.late_fine_per_month }}. Thank you for your
+                            cooperation.
+                        </div>
+
+                    </div>
+                </mat-card>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

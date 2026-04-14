@@ -9,10 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { ApiService } from 'app/core/services/api.service';
-import { DashboardStats } from 'app/core/models';
-
-// Fuse directives and components could be imported if available, but for simplicity we rely on standard Material cards if needed
-// Actually, Fuse uses standard Tailwind so standard html works great.
 
 @Component({
     selector: 'app-dashboard',
@@ -26,52 +22,57 @@ import { DashboardStats } from 'app/core/models';
         CurrencyPipe,
         DatePipe
     ],
-    templateUrl: './dashboard.component.html',
+    templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
     private _apiService = inject(ApiService);
 
-    stats: DashboardStats | null = null;
+    stats: any = null;
     recentPayments: any[] = [];
-    classCollection: any[] = [];
-
     isLoading = true;
 
-    chartOptions: any = {
-        series: [],
-        chart: { type: 'bar', height: 350 },
-        plotOptions: { bar: { horizontal: false, columnWidth: '55%' } },
-        dataLabels: { enabled: false },
-        xaxis: { categories: [] },
-        yaxis: { title: { text: 'Amount (PKR)' } },
-        fill: { opacity: 1 },
-        tooltip: { y: { formatter: function (val: number) { return "PKR " + val } } }
-    };
+    // Charts
+    classChartOptions: any;
+    weeklyChartOptions: any;
 
     displayedColumns: string[] = ['receipt_no', 'student_name', 'amount', 'payment_method', 'payment_date'];
 
     constructor() {
+        this._initCharts();
+
         interval(60000)
             .pipe(
                 startWith(0),
                 takeUntilDestroyed(),
-                switchMap(() => {
-                    this.isLoading = true;
-                    return forkJoin({
-                        stats: this._apiService.getDashboardStats(),
-                        payments: this._apiService.getRecentPayments(),
-                        collection: this._apiService.getClassCollection()
-                    });
-                })
+                switchMap(() => forkJoin({
+                    stats: this._apiService.getDashboardStats(),
+                    payments: this._apiService.getRecentPayments(),
+                    classColl: this._apiService.getClassCollection(),
+                    weeklyColl: this._apiService.getWeeklyCollection()
+                }))
             )
             .subscribe({
-                next: (data) => {
-                    this.stats = data.stats;
-                    this.recentPayments = data.payments;
-                    this.classCollection = data.collection;
+                next: (res) => {
+                    this.stats = res.stats;
+                    this.recentPayments = res.payments;
 
-                    this.chartOptions.xaxis = { categories: data.collection.map((c: any) => c.class_name) };
-                    this.chartOptions.series = [{ name: 'Collected', data: data.collection.map((c: any) => c.collected) }];
+                    // Update Class Collection Chart
+                    this.classChartOptions.series = [{
+                        name: 'Amount Collected',
+                        data: res.classColl.map(c => c.total)
+                    }];
+                    this.classChartOptions.xaxis = {
+                        categories: res.classColl.map(c => c.name)
+                    };
+
+                    // Update Weekly Trend Chart
+                    this.weeklyChartOptions.series = [{
+                        name: 'Daily Collection',
+                        data: res.weeklyColl.map(w => w.total)
+                    }];
+                    this.weeklyChartOptions.xaxis = {
+                        categories: res.weeklyColl.map(w => w.date)
+                    };
 
                     this.isLoading = false;
                 },
@@ -83,4 +84,30 @@ export class DashboardComponent implements OnInit {
     }
 
     ngOnInit(): void { }
+
+    private _initCharts(): void {
+        this.classChartOptions = {
+            series: [],
+            chart: { type: 'bar', height: 300, toolbar: { show: false }, animations: { enabled: true } },
+            plotOptions: { bar: { horizontal: false, columnWidth: '40%', borderRadius: 4 } },
+            dataLabels: { enabled: false },
+            colors: ['#04342C'],
+            xaxis: { categories: [], axisBorder: { show: false } },
+            yaxis: { labels: { formatter: (val: number) => `PKR ${val.toLocaleString()}` } },
+            grid: { padding: { left: 0, right: 0 } },
+            tooltip: { theme: 'dark' }
+        };
+
+        this.weeklyChartOptions = {
+            series: [],
+            chart: { type: 'area', height: 300, toolbar: { show: false }, sparkline: { enabled: false } },
+            dataLabels: { enabled: false },
+            colors: ['#04342C'],
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: { categories: [], axisBorder: { show: false } },
+            yaxis: { labels: { formatter: (val: number) => `PKR ${val.toLocaleString()}` } },
+            tooltip: { theme: 'dark' }
+        };
+    }
 }

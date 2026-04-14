@@ -1,0 +1,108 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-8 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center font-medium">
+                <div>
+                    <a class="whitespace-nowrap text-primary-500">Settings</a>
+                </div>
+                <div class="flex items-center ml-1 whitespace-nowrap">
+                    <mat-icon class="icon-size-5 text-secondary" [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                    <a class="ml-1 text-secondary">School Configuration</a>
+                </div>
+            </div>
+            <div class="mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    School Profile & Branding
+                </h2>
+            </div>
+        </div>
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+            <button mat-flat-button [color]="'primary'" [disabled]="form.invalid || isSaving" (click)="save()">
+                @if (isSaving) {
+                <mat-progress-spinner class="mr-2" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+                }
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div>
+            <form [formGroup]="form" class="flex flex-col mt-4 p-8 pb-4 bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex flex-col sm:flex-row">
+                    <div class="flex flex-col items-center sm:items-start mr-8 mb-8 sm:mb-0">
+                        <div class="text-lg font-semibold mb-4 text-secondary">School Logo</div>
+                        <div
+                            class="relative flex items-center justify-center w-48 h-48 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50">
+                            @if (logoPreview) {
+                            <img class="object-contain w-full h-full" [src]="logoPreview" />
+                            } @else {
+                            <mat-icon class="icon-size-12 text-hint" [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                            }
+                            <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                (change)="onFileSelected($event)" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <div class="flex-auto grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                        <mat-form-field appearance="outline" class="sm:col-span-2">
+                            <mat-label>School Name</mat-label>
+                            <input matInput formControlName="school_name" placeholder="Enter school name" required>
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Email Address</mat-label>
+                            <input matInput formControlName="email" type="email" placeholder="school@example.com">
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Phone Number</mat-label>
+                            <input matInput formControlName="phone" placeholder="+92 300 1234567">
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="sm:col-span-2">
+                            <mat-label>Full Address</mat-label>
+                            <textarea matInput formControlName="address" rows="2"
+                                placeholder="School building address..."></textarea>
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-8 border-t">
+                    <div class="text-xl font-bold mb-6">Financial & System Preferences</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Currency</mat-label>
+                            <input matInput formControlName="currency">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Monthly Due Day</mat-label>
+                            <input matInput type="number" formControlName="fee_due_day">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Late Fee Fine</mat-label>
+                            <input matInput type="number" formControlName="late_fine_per_month">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="sm:col-span-2 md:col-span-3">
+                            <mat-label>WhatsApp Gateway URL</mat-label>
+                            <input matInput formControlName="whatsapp_node_url"
+                                placeholder="http://api.whatsapp-node.local">
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:chat-bubble-left-ellipsis'"></mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,12 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { ApiService } from 'app/core/services/api.service';
 
@@ -15,12 +22,18 @@ import { ApiService } from 'app/core/services/api.service';
     standalone: true,
     imports: [
         CommonModule,
+        ReactiveFormsModule,
         MatTableModule,
         MatCheckboxModule,
         MatIconModule,
         MatButtonModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        MatPaginatorModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSidenavModule,
         CurrencyPipe,
         DatePipe
     ],
@@ -29,23 +42,67 @@ import { ApiService } from 'app/core/services/api.service';
 export class DefaulterListComponent implements OnInit {
     private _apiService = inject(ApiService);
     private _snackBar = inject(MatSnackBar);
+    private _fb = inject(FormBuilder);
 
-    displayedColumns = ['select', 'student_name', 'class_name', 'parent_phone', 'unpaid_amount', 'due_date', 'actions'];
+    displayedColumns = ['select', 'student_name', 'class_name', 'guardian_phone', 'unpaid_count', 'total_due', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
     selection = new SelectionModel<any>(true, []);
     isLoading = true;
 
-    constructor() { }
+    // Filters
+    filterForm: FormGroup;
+    classes: any[] = [];
+
+    // Pagination
+    totalRecords = 0;
+    pageSize = 25;
+    pageIndex = 0;
+
+    // Details Drawer
+    selectedStudent: any = null;
+    studentInvoices: any[] = [];
+    isLoadingDetails = false;
+
+    @ViewChild('drawer') drawer: any;
+
+    constructor() {
+        this.filterForm = this._fb.group({
+            search: [''],
+            class_id: ['all']
+        });
+    }
 
     ngOnInit() {
+        this.loadClasses();
         this.loadDefaulters();
+
+        // Sub to filter changes
+        this.filterForm.valueChanges
+            .pipe(debounceTime(500), distinctUntilChanged())
+            .subscribe(() => {
+                this.pageIndex = 0;
+                this.loadDefaulters();
+            });
+    }
+
+    loadClasses() {
+        this._apiService.getClasses().subscribe(res => this.classes = res);
     }
 
     loadDefaulters() {
         this.isLoading = true;
-        this._apiService.getDefaulters().subscribe({
+        
+        const params = {
+            page: this.pageIndex + 1,
+            per_page: this.pageSize,
+            search: this.filterForm.value.search,
+            class_id: this.filterForm.value.class_id
+        };
+
+        this._apiService.getDefaulters(params).subscribe({
             next: (res) => {
-                this.dataSource.data = res;
+                this.dataSource.data = res.defaulters.data;
+                this.totalRecords = res.defaulters.total;
                 this.selection.clear();
                 this.isLoading = false;
             },
@@ -54,6 +111,12 @@ export class DefaulterListComponent implements OnInit {
                 this._snackBar.open('Failed to load defaulters', 'Close');
             }
         });
+    }
+
+    onPageChange(event: PageEvent) {
+        this.pageSize = event.pageSize;
+        this.pageIndex = event.pageIndex;
+        this.loadDefaulters();
     }
 
     isAllSelected() {
@@ -68,15 +131,33 @@ export class DefaulterListComponent implements OnInit {
             this.dataSource.data.forEach(row => this.selection.select(row));
     }
 
+    openDetails(student: any) {
+        this.selectedStudent = student;
+        this.isLoadingDetails = true;
+        this.studentInvoices = [];
+        this.drawer.open();
+
+        this._apiService.getDefaulterSummary(student.id).subscribe({
+            next: (res) => {
+                this.studentInvoices = res.invoices;
+                this.isLoadingDetails = false;
+            },
+            error: () => {
+                this.isLoadingDetails = false;
+                this._snackBar.open('Failed to load invoice details', 'Close');
+            }
+        });
+    }
+
     sendSingleReminder(row: any) {
         this.isLoading = true;
-        this._apiService.sendWhatsAppReminder({ student_ids: [row.student_id] }).subscribe({
+        this._apiService.sendBulkReminders([row.id]).subscribe({
             next: () => {
-                this._snackBar.open('WhatsApp reminder sent!', 'Close', { duration: 3000 });
+                this._snackBar.open('Reminder queued for sending!', 'Close', { duration: 3000 });
                 this.isLoading = false;
             },
             error: () => {
-                this._snackBar.open('Error sending reminder.', 'Close', { duration: 3000 });
+                this._snackBar.open('Error queuing reminder.', 'Close', { duration: 3000 });
                 this.isLoading = false;
             }
         });
@@ -84,17 +165,17 @@ export class DefaulterListComponent implements OnInit {
 
     sendBulkReminders() {
         if (this.selection.selected.length === 0) return;
-        const studentIds = this.selection.selected.map(row => row.student_id);
+        const studentIds = this.selection.selected.map(row => row.id);
 
         this.isLoading = true;
-        this._apiService.sendWhatsAppReminder({ student_ids: studentIds }).subscribe({
+        this._apiService.sendBulkReminders(studentIds).subscribe({
             next: () => {
-                this._snackBar.open(`Reminders sent to ${studentIds.length} students!`, 'Close', { duration: 3000 });
+                this._snackBar.open(`Reminders queued for ${studentIds.length} students!`, 'Close', { duration: 3000 });
                 this.selection.clear();
                 this.isLoading = false;
             },
             error: () => {
-                this._snackBar.open('Error sending bulk reminders.', 'Close', { duration: 3000 });
+                this._snackBar.open('Error queuing bulk reminders.', 'Close', { duration: 3000 });
                 this.isLoading = false;
             }
         });

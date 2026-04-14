@@ -44,8 +44,8 @@ const _navigationBase: FuseNavigationItem[] = [
                 link: '/fee/structures',
             },
             {
-                id: 'fee-management.invoices',
-                title: 'Invoices',
+                id: 'fee-management.vouchers',
+                title: 'Fee Vouchers',
                 type: 'basic',
                 icon: 'heroicons_outline:document-text',
                 link: '/fee/invoices',

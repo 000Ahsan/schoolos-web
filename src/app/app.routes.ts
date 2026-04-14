@@ -92,6 +92,9 @@ export const appRoutes: Route[] = [
             // Academic Years
             { path: 'academic-years', loadChildren: () => import('./modules/academic-years/academic-years.routes') },
 
+            // Settings
+            { path: 'settings', loadChildren: () => import('./modules/settings/settings.routes') },
+
             // 404 & Catch all
             { path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.routes') },
             { path: '**', redirectTo: '404-not-found' }

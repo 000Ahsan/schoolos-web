@@ -47,18 +47,23 @@ export class ApiService {
     }
     createFeeStructure(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/structures`, data); }
     updateFeeStructure(id: number, data: any): Observable<any> { return this._http.put<any>(`${this._apiUrl}/fee/structures/${id}`, data); }
+    deleteFeeStructure(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/fee/structures/${id}`); }
 
     // Fee Invoices
-    getInvoices(params?: any): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/fee/invoices`, { params }); }
+    getInvoices(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices`, { params }); }
     generateInvoices(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/invoices/generate`, data); }
     getInvoice(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices/${id}`); }
-    getDefaulters(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/fee/defaulters`); }
+    getDefaulters(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters`, { params }); }
+    getDefaulterSummary(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters/${id}`); }
+    sendBulkReminders(student_ids: number[]): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/defaulters/bulk-remind`, { student_ids }); }
 
     // Fee Payments
     recordPayment(invoiceId: number, data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/invoices/${invoiceId}/payments`, data); }
+    getPayments(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/payments`, { params }); }
     getReceipt(paymentId: number): Observable<Blob> { return this._http.get(`${this._apiUrl}/fee/payments/${paymentId}/receipt`, { responseType: 'blob' }); }
 
     // WhatsApp
+    sendVoucherWhatsApp(invoiceId: number): Observable<any> { return this._http.post<any>(`${this._apiUrl}/whatsapp/voucher/${invoiceId}`, {}); }
     sendWhatsAppReminder(data: { student_ids: number[] }): Observable<any> { return this._http.post<any>(`${this._apiUrl}/whatsapp/reminders/send`, data); }
     getWhatsAppLogs(params?: any): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/whatsapp/logs`, { params }); }
 
@@ -66,4 +71,17 @@ export class ApiService {
     getDashboardStats(): Observable<any> { return this._http.get<any>(`${this._apiUrl}/dashboard/stats`); }
     getRecentPayments(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/dashboard/recent-payments`); }
     getClassCollection(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/dashboard/class-collection`); }
+    getWeeklyCollection(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/dashboard/weekly-collection`); }
+    
+    // Settings
+    getSchoolSettings(): Observable<any> { return this._http.get<any>(`${this._apiUrl}/school-settings`); }
+    updateSchoolSettings(data: any): Observable<any> { 
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key]);
+            }
+        });
+        return this._http.post<any>(`${this._apiUrl}/school-settings`, formData); 
+    }
 }
