@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
@@ -78,7 +79,8 @@ export class PromoteDialogComponent {
         MatInputModule,
         MatDatepickerModule,
         ReactiveFormsModule,
-        DatePipe
+        DatePipe,
+        TableSkeletonComponent
     ],
     templateUrl: './academic-year-list.component.html'
 })
@@ -199,7 +201,10 @@ export class AcademicYearListComponent implements OnInit {
                         this._snackBar.open('Academic Year deleted successfully', 'Close', { duration: 3000 });
                         this.loadYears();
                     },
-                    error: () => this._snackBar.open('Error deleting academic year', 'Close', { duration: 3000 })
+                    error: (err) => {
+                        const message = err.error?.message || 'Error deleting academic year';
+                        this._snackBar.open(message, 'Close', { duration: 5000 });
+                    }
                 });
             }
         });

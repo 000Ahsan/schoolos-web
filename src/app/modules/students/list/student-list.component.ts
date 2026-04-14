@@ -11,11 +11,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
+import { StudentFeeHistoryDialogComponent } from './student-fee-history-dialog.component';
 
 @Component({
     selector: 'app-student-list',
@@ -33,8 +36,10 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
         MatButtonModule,
         MatDialogModule,
         MatSnackBarModule,
+        MatTooltipModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        TableSkeletonComponent
     ],
     templateUrl: './student-list.component.html'
 })
@@ -113,6 +118,12 @@ export class StudentListComponent implements OnInit {
             search: this.filterSearch,
             cls: this.filterClass,
             status: this.filterStatus
+        });
+    }
+
+    viewFeeHistory(student: any) {
+        this._dialog.open(StudentFeeHistoryDialogComponent, {
+            data: { student }
         });
     }
 

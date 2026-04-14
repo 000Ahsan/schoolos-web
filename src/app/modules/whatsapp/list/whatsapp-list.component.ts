@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ApiService } from 'app/core/services/api.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
     selector: 'app-whatsapp-list',
@@ -22,7 +23,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
         MatPaginatorModule,
         MatFormFieldModule,
         MatInputModule,
-        DatePipe
+        DatePipe,
+        TableSkeletonComponent
     ],
     template: `
     <div class="flex flex-col flex-auto min-w-0 p-8 pt-10">
@@ -93,9 +95,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
             <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors group"></tr>
           </table>
 
-          <div *ngIf="isLoading" class="absolute inset-0 bg-white bg-opacity-60 flex flex-col items-center justify-center">
-            <mat-spinner diameter="32"></mat-spinner>
-          </div>
+          <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="5"></app-table-skeleton>
 
           <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center">
             <mat-icon svgIcon="heroicons_outline:chat-bubble-left-ellipsis" class="icon-size-12 text-hint mb-4"></mat-icon>
@@ -117,7 +117,7 @@ export class WhatsappListComponent implements OnInit {
     private _apiService = inject(ApiService);
 
     searchControl = new FormControl('');
-    displayedColumns = ['sent_to', 'student_name', 'message_content', 'sent_at', 'status'];
+    displayedColumns = ['student', 'phone', 'type', 'status', 'date'];
     dataSource = new MatTableDataSource<any>([]);
     
     isLoading = true;

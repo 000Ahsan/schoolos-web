@@ -105,10 +105,7 @@
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors group cursor-pointer" (click)="openDetails(row)"></tr>
                     </table>
 
-                    <div *ngIf="isLoading" class="p-8 text-center text-hint">
-                        <mat-spinner diameter="32" class="mx-auto mb-4"></mat-spinner>
-                        Loading defaulters...
-                    </div>
+                        <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="7"></app-table-skeleton>
                     <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center">
                         <mat-icon svgIcon="heroicons_outline:check-badge" class="icon-size-12 text-green-500 mb-4"></mat-icon>
                         <div class="text-lg font-medium text-secondary">Great job! No defaulters found.</div>

@@ -147,11 +147,7 @@
                     class="hover:bg-gray-50 transition-colors cursor-pointer group"></tr>
             </table>
 
-            <div *ngIf="isLoading"
-                class="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex flex-col items-center justify-center z-10">
-                <mat-spinner diameter="40"></mat-spinner>
-                <span class="mt-4 font-medium text-secondary">Synchronizing financial records...</span>
-            </div>
+            <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="6"></app-table-skeleton>
 
             <div *ngIf="!isLoading && dataSource.data.length === 0"
                 class="flex flex-col items-center justify-center p-24 text-center">

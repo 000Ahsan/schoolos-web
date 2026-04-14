@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 import { ApiService } from 'app/core/services/api.service';
 
@@ -24,6 +25,7 @@ import { ApiService } from 'app/core/services/api.service';
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    TableSkeletonComponent,
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,

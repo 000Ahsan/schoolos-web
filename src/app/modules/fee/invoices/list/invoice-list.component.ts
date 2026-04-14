@@ -16,6 +16,7 @@ import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 import { ApiService } from 'app/core/services/api.service';
 
@@ -31,6 +32,7 @@ import { ApiService } from 'app/core/services/api.service';
         MatDialogModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        TableSkeletonComponent,
         MatSidenavModule,
         MatFormFieldModule,
         MatInputModule,

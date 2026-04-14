@@ -11,9 +11,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
     selector: 'app-fee-structure-list',
@@ -26,12 +28,14 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
         MatDialogModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
+        TableSkeletonComponent,
         MatSidenavModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
         ReactiveFormsModule,
-        CurrencyPipe
+        CurrencyPipe,
+        MatTooltipModule
     ],
     templateUrl: './fee-structure-list.component.html'
 })
@@ -159,5 +163,10 @@ export class FeeStructureListComponent implements OnInit {
                 });
             }
         });
+    }
+
+    getClassTooltip(classes: any[]): string {
+        if (!classes || classes.length <= 3) return '';
+        return classes.slice(3).map(c => c.name).join(', ');
     }
 }

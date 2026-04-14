@@ -11,9 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
+import { ClassStudentsDialogComponent } from './class-students-dialog.component';
 
 @Component({
     selector: 'app-class-list',
@@ -31,7 +36,11 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
         MatInputModule,
         MatSlideToggleModule,
         MatSnackBarModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatDialogModule,
+        MatTooltipModule,
+        MatDividerModule,
+        TableSkeletonComponent
     ],
     templateUrl: './class-list.component.html'
 })
@@ -40,11 +49,12 @@ export class ClassListComponent implements OnInit {
     private _fb = inject(FormBuilder);
     private _snackBar = inject(MatSnackBar);
     private _fuseConfirmationService = inject(FuseConfirmationService);
+    private _dialog = inject(MatDialog);
 
     @ViewChild('drawer') drawer: MatDrawer;
     @ViewChild(MatSort) sort: MatSort;
 
-    displayedColumns = ['name', 'section', 'numeric_order', 'capacity', 'is_active', 'actions'];
+    displayedColumns = ['name', 'section', 'students_count', 'numeric_order', 'capacity', 'is_active', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
     isLoading = true;
     isSaving = false;
@@ -141,6 +151,12 @@ export class ClassListComponent implements OnInit {
                     }
                 });
             }
+        });
+    }
+
+    viewStudents(cls: any) {
+        this._dialog.open(ClassStudentsDialogComponent, {
+            data: { class: cls }
         });
     }
 }

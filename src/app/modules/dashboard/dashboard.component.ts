@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { ApiService } from 'app/core/services/api.service';
+import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -20,7 +21,8 @@ import { ApiService } from 'app/core/services/api.service';
         MatIconModule,
         NgApexchartsModule,
         CurrencyPipe,
-        DatePipe
+        DatePipe,
+        TableSkeletonComponent
     ],
     templateUrl: './dashboard.component.html'
 })
