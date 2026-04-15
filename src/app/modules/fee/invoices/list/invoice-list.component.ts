@@ -15,10 +15,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 import { ApiService } from 'app/core/services/api.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector: 'app-invoice-list',
@@ -40,6 +42,7 @@ import { ApiService } from 'app/core/services/api.service';
         MatDatepickerModule,
         MatPaginatorModule,
         MatTooltipModule,
+        MatCheckboxModule,
         ReactiveFormsModule,
         CurrencyPipe,
         DatePipe
@@ -50,6 +53,7 @@ export class InvoiceListComponent implements OnInit {
     private _apiService = inject(ApiService);
     private _snackBar = inject(MatSnackBar);
     private _fb = inject(FormBuilder);
+    private _fuseConfirmationService = inject(FuseConfirmationService);
 
     @ViewChild('drawer') drawer: MatDrawer;
 
@@ -66,7 +70,9 @@ export class InvoiceListComponent implements OnInit {
         this.generateForm = this._fb.group({
             billing_month: [new Date().toISOString().substring(0, 7), Validators.required],
             due_date: [{ value: '', disabled: true }, Validators.required],
-            classes: [[], Validators.required]
+            classes: [[], Validators.required],
+            include_admission: [true],
+            include_annual: [true]
         });
 
         // Auto-calculate due date when billing month changes
@@ -170,6 +176,15 @@ export class InvoiceListComponent implements OnInit {
         // Use getRawValue because due_date is disabled
         const val = { ...this.generateForm.getRawValue() };
 
+        // Restriction: check if billing_month is in future
+        const now = new Date();
+        const currentYYMM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (val.billing_month > currentYYMM) {
+            this._snackBar.open('You cannot generate vouchers for future months.', 'Close', { duration: 3000 });
+            this.isGenerating = false;
+            return;
+        }
+
         // Format due_date
         const formatDate = (date: any) => {
             if (!date) return null;
@@ -184,9 +199,40 @@ export class InvoiceListComponent implements OnInit {
                 this.closeDrawer();
                 this.loadVouchers();
             },
-            error: () => {
+            error: (err) => {
                 this.isGenerating = false;
-                this._snackBar.open('Error generating vouchers', 'Close', { duration: 3000 });
+                this._snackBar.open(err.error?.error || 'Error generating vouchers', 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    deleteInvoice(invoice: any) {
+        if (invoice.status !== 'pending' && invoice.status !== 'overdue') {
+            this._snackBar.open('Only pending or overdue vouchers can be deleted.', 'Close', { duration: 3000 });
+            return;
+        }
+
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Delete Voucher',
+            message: `Are you sure you want to delete invoice ${invoice.invoice_no}? If this was part of a carried-forward chain, older balances will be restored.`,
+            actions: {
+                confirm: { label: 'Delete', color: 'warn' }
+            }
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this.isLoading = true;
+                this._apiService.deleteInvoice(invoice.id).subscribe({
+                    next: () => {
+                        this._snackBar.open('Voucher deleted and history restored.', 'Close', { duration: 3000 });
+                        this.loadVouchers();
+                    },
+                    error: (err) => {
+                        this.isLoading = false;
+                        this._snackBar.open(err.error?.error || 'Failed to delete voucher.', 'Close', { duration: 3000 });
+                    }
+                });
             }
         });
     }

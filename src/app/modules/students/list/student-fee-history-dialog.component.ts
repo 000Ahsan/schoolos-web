@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +25,6 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
         MatTooltipModule,
         MatChipsModule,
         CurrencyPipe,
-        DatePipe,
         TableSkeletonComponent
     ],
     template: `

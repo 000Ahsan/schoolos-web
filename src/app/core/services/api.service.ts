@@ -53,6 +53,7 @@ export class ApiService {
     getInvoices(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices`, { params }); }
     generateInvoices(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/invoices/generate`, data); }
     getInvoice(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices/${id}`); }
+    deleteInvoice(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/fee/invoices/${id}`); }
     getDefaulters(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters`, { params }); }
     getDefaulterSummary(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters/${id}`); }
     sendBulkReminders(student_ids: number[]): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/defaulters/bulk-remind`, { student_ids }); }
