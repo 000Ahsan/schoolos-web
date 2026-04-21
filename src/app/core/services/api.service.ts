@@ -9,7 +9,7 @@ export class ApiService {
     private _apiUrl = environment.apiUrl;
 
     // Students
-    getStudents(params?: any): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/students`, { params }); }
+    getStudents(params?: any): Observable<any> { return this._http.get<any>(`${this._apiUrl}/students`, { params }); }
     getStudent(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/students/${id}`); }
     createStudent(data: any, id?: number): Observable<any> { 
         const url = id ? `${this._apiUrl}/students/${id}` : `${this._apiUrl}/students`;
@@ -56,11 +56,13 @@ export class ApiService {
     deleteInvoice(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/fee/invoices/${id}`); }
     getDefaulters(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters`, { params }); }
     getDefaulterSummary(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters/${id}`); }
+    getStudentLedger(studentId: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices/student/${studentId}/ledger`); }
     sendBulkReminders(student_ids: number[]): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/defaulters/bulk-remind`, { student_ids }); }
 
     // Fee Payments
     recordPayment(invoiceId: number, data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/invoices/${invoiceId}/payments`, data); }
     getPayments(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/payments`, { params }); }
+    getPayment(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/payments/${id}`); }
     getReceipt(paymentId: number): Observable<Blob> { return this._http.get(`${this._apiUrl}/fee/payments/${paymentId}/receipt`, { responseType: 'blob' }); }
 
     // WhatsApp

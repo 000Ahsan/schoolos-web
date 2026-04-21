@@ -1,168 +1,353 @@
-<div class="flex flex-col flex-auto min-w-0 p-8 pt-10 bg-gray-50/50">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
 
-    <!-- Header & Statistics -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-8">
-        <div>
-            <div class="text-3xl font-semibold tracking-tight leading-8">Payments Repository</div>
-            <div class="font-medium tracking-tight text-secondary">Advanced tracking and financial auditing</div>
-        </div>
-    </div>
-
-    <!-- Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
-        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl border-l-4 border-primary overflow-hidden">
-            <div class="flex items-center justify-between">
+    <!-- Payment Drawer -->
+    <mat-drawer #drawer class="w-full sm:w-120 dark:bg-gray-900 border-l shadow-2xl" [mode]="'over'"
+        [position]="'right'">
+        <div class="flex flex-col h-full bg-card shadow-xl overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-8 py-6 border-b bg-gray-50/80 backdrop-blur-sm z-10">
                 <div class="flex flex-col">
-                    <div class="text-sm font-medium text-secondary uppercase tracking-wider">Total Fee Collected in
-                        {{ getSelectedMonthLabel() }} {{ filterForm.value.year }}</div>
-                    <div class="text-3xl font-bold mt-1">{{ stats?.total_amount | currency:'PKR':'symbol':'1.0-0' }}
+                    <div class="text-xl font-bold tracking-tight text-gray-900">Receive Payment</div>
+                    <div class="text-xs font-medium text-secondary" *ngIf="selectedStudent">for
+                        {{selectedStudent.name}}</div>
+                </div>
+                <button mat-icon-button (click)="drawer.close()" class="-mr-4">
+                    <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
+                </button>
+            </div>
+
+            <!-- Content (Scrollable) -->
+            <div class="flex-auto overflow-y-auto min-h-0 p-8 space-y-8 bg-white">
+                <!-- Step 1: Search Student -->
+                <div class="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
+                    <div class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-700">1. Identify Student</div>
+                    <mat-form-field class="w-full" appearance="outline" [subscriptSizing]="'dynamic'">
+                        <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"
+                            class="icon-size-5 mr-3 text-secondary"></mat-icon>
+                        <input matInput [formControl]="studentSearchControl" [matAutocomplete]="auto"
+                            placeholder="Type student name or roll number...">
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayStudent"
+                            (optionSelected)="onStudentSelected($event.option.value)">
+                            <mat-option *ngFor="let student of filteredStudents$ | async" [value]="student"
+                                class="py-4 h-auto">
+                                <div class="flex flex-col leading-tight">
+                                    <span class="font-bold text-gray-900">{{student.name}}</span>
+                                    <span class="text-xs text-secondary">{{student.class?.name}} |
+                                        {{student.roll_no}}</span>
+                                </div>
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <!-- Step 2: Ledger Summary -->
+                <div *ngIf="selectedStudent && studentLedger">
+                    <div class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">2. Outstanding Balance
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="p-6 bg-red-50 border border-red-100 rounded-2xl relative overflow-hidden">
+                            <div class="text-xs text-red-600 font-bold uppercase tracking-widest relative z-10">Total
+                                Due</div>
+                            <div class="text-3xl font-black text-red-700 relative z-10">{{
+                                studentLedger.total_outstanding |
+                                currency:'PKR':'symbol':'1.0-0' }}</div>
+                            <!-- Background Icon -->
+                            <mat-icon class="absolute -right-4 -bottom-4 icon-size-24 text-red-200/50 -rotate-12"
+                                svgIcon="heroicons_outline:exclamation-circle"></mat-icon>
+                        </div>
+                    </div>
+
+                    <!-- Unpaid Invoices List -->
+                    <div class="mt-6 border rounded-2xl overflow-hidden bg-white shadow-sm">
+                        <div class="bg-gray-50 px-6 py-3 text-xs font-bold border-b uppercase text-secondary">Pending
+                            Vouchers</div>
+                        @for (inv of studentLedger.invoices; track $index) {
+                        @if (inv.balance > 0) {
+                        <div
+                            class="flex items-center justify-between px-6 py-4 border-b last:border-0 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-gray-900">{{inv.month}}/{{inv.year}}</span>
+                                <span
+                                    class="text-[10px] text-secondary uppercase font-medium tracking-tighter">{{inv.invoice_no}}</span>
+                            </div>
+                            <div class="text-sm font-black text-red-600">{{inv.balance |
+                                currency:'PKR':'symbol':'1.0-0'}}</div>
+                        </div>
+                        }
+                        }
                     </div>
                 </div>
-                <div class="p-3 bg-primary-50 rounded-full">
-                    <mat-icon class="icon-size-8 text-primary" svgIcon="heroicons_outline:banknotes"></mat-icon>
-                </div>
+
+                <!-- Step 3: Payment Form -->
+                <form [formGroup]="paymentForm" class="flex flex-col gap-6" *ngIf="selectedStudent">
+                    <div class="text-sm font-bold text-gray-800 uppercase tracking-wider">3. Record Collection</div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Amount to Receive</mat-label>
+                        <input matInput type="number" formControlName="amount_paid" placeholder="Enter amount...">
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Method</mat-label>
+                            <mat-select formControlName="payment_method">
+                                <mat-option value="cash">
+                                    <div class="flex items-center">
+                                        <mat-icon class="icon-size-4 mr-2 text-green-600"
+                                            svgIcon="heroicons_outline:banknotes"></mat-icon>
+                                        Cash
+                                    </div>
+                                </mat-option>
+                                <mat-option value="bank_transfer">
+                                    <div class="flex items-center">
+                                        <mat-icon class="icon-size-4 mr-2 text-blue-600"
+                                            svgIcon="heroicons_outline:building-library"></mat-icon>
+                                        Bank Transfer
+                                    </div>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Date</mat-label>
+                            <input matInput [matDatepicker]="picker" formControlName="payment_date">
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Remarks / Notes</mat-label>
+                        <textarea matInput formControlName="remarks" rows="3"
+                            placeholder="Optional notes..."></textarea>
+                    </mat-form-field>
+                </form>
             </div>
-            <div class="flex items-center mt-4 text-xs font-medium text-secondary">
-                <span class="text-green-600 font-bold mr-1">{{ stats?.count }}</span>
-                <span>Total Transactions</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- Filters Section -->
-    <div class="bg-card shadow rounded-2xl mb-8 p-6">
-        <form [formGroup]="filterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Search -->
-            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                <mat-label>Search Receipt or Student</mat-label>
-                <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass" class="icon-size-5 mr-2"></mat-icon>
-                <input matInput formControlName="search" placeholder="Enter keywords...">
-            </mat-form-field>
-
-            <!-- Class Filter -->
-            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                <mat-label>Class</mat-label>
-                <mat-select formControlName="class_id">
-                    <mat-option [value]="null">All Classes</mat-option>
-                    <mat-option *ngFor="let class of classes" [value]="class.id">
-                        {{ class.name }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <!-- Month Filter -->
-            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                <mat-label>Month</mat-label>
-                <mat-select formControlName="month">
-                    <mat-option *ngFor="let m of months" [value]="m.value">
-                        {{ m.label }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <!-- Year Filter -->
-            <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                <mat-label>Year</mat-label>
-                <mat-select formControlName="year">
-                    <mat-option *ngFor="let y of years" [value]="y">
-                        {{ y }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        </form>
-    </div>
-
-    <!-- Data Table -->
-    <div class="flex flex-col flex-auto overflow-hidden bg-card shadow rounded-2xl border">
-        <div class="overflow-x-auto relative min-h-64">
-            <table mat-table [dataSource]="dataSource" class="w-full min-w-max border-separate border-spacing-0">
-
-                <ng-container matColumnDef="student">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Student Info </th>
-                    <td mat-cell *matCellDef="let element">
-                        <div class="flex flex-col py-3">
-                            <span class="font-semibold text-gray-800">{{element.invoice?.student?.name}}</span>
-                            <span class="text-xs text-secondary">{{element.invoice?.student?.class?.name}} (Roll:
-                                {{element.invoice?.student?.roll_no}})</span>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="receipt_no">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Receipt No. </th>
-                    <td mat-cell *matCellDef="let element" class="font-bold text-primary"> {{element.receipt_no}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="invoice">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Billing Month
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <span class="px-2.5 py-1 rounded bg-gray-100 text-gray-700 font-medium text-xs">
-                            {{element.invoice?.month}}/{{element.invoice?.year}}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="amount">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Amount Paid </th>
-                    <td mat-cell *matCellDef="let element">
-                        <span class="font-extrabold text-primary text-lg">
-                            {{element.amount_paid | currency:'PKR':'symbol':'1.0-0'}}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="method">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Payment Method
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <div class="flex items-center">
-                            <mat-icon class="icon-size-4 mr-2" [ngClass]="{
-                                'text-green-600': element.payment_method === 'cash',
-                                'text-blue-600': element.payment_method === 'bank_transfer',
-                                'text-purple-600': element.payment_method === 'online',
-                                'text-orange-600': element.payment_method === 'cheque'
-                            }"
-                                [svgIcon]="methodIcons[element.payment_method] || 'heroicons_outline:credit-card'"></mat-icon>
-                            <span class="text-sm font-medium">{{element.payment_method | titlecase}}</span>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Received At </th>
-                    <td mat-cell *matCellDef="let element" class="text-secondary text-sm">
-                        {{element.payment_date | date:'dd MMM, yyyy'}}
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                    class="hover:bg-gray-50 transition-colors cursor-pointer group"></tr>
-            </table>
-
-            <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="6"></app-table-skeleton>
-
-            <div *ngIf="!isLoading && dataSource.data.length === 0"
-                class="flex flex-col items-center justify-center p-24 text-center">
-                <div class="p-6 bg-gray-100 rounded-full mb-4">
-                    <mat-icon svgIcon="heroicons_outline:document-magnifying-glass"
-                        class="icon-size-16 text-hint"></mat-icon>
-                </div>
-                <div class="text-2xl font-bold tracking-tight text-secondary">No payments tracked for this criteria
-                </div>
-                <div class="mt-1 text-secondary max-w-xs">Adjust your filters or try a different search term to find the
-                    records you're looking for.</div>
+            <!-- Actions (Sticky Footer) -->
+            <div class="p-8 border-t bg-gray-50 flex items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+                *ngIf="selectedStudent">
+                <button mat-flat-button class="w-full h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/20"
+                    color="primary" [disabled]="paymentForm.invalid || isSaving" (click)="recordPayment()">
+                    <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle" class="mr-2"></mat-icon>
+                    <mat-progress-spinner *ngIf="isSaving" [diameter]="24" [mode]="'indeterminate'"
+                        class="mr-2"></mat-progress-spinner>
+                    {{ isSaving ? 'Processing...' : 'Confirm Payment' }}
+                </button>
             </div>
         </div>
+    </mat-drawer>
 
-        <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
-            (page)="onPageChange($event)" class="border-t bg-gray-50"></mat-paginator>
-    </div>
-</div>
+    <mat-drawer-content class="flex flex-col flex-auto overflow-y-auto">
+        <div class="flex flex-col flex-auto min-w-0 p-8 pt-10">
+
+            <!-- Header & Statistics -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-8">
+                <div>
+                    <div class="text-3xl font-semibold tracking-tight leading-8">Payments Repository</div>
+                    <div class="font-medium tracking-tight text-secondary">Advanced tracking and financial auditing
+                    </div>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <button mat-flat-button color="primary" class="rounded-full px-6" (click)="openDrawer()">
+                        <mat-icon svgIcon="heroicons_outline:plus-circle"></mat-icon>
+                        <span class="ml-2">Receive Payment</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-6 mb-8 text-white">
+                <div
+                    class="flex flex-col flex-auto p-6 bg-primary shadow rounded-2xl border-l-4 border-primary-600 overflow-hidden relative">
+                    <div class="flex items-center justify-between relative z-10">
+                        <div class="flex flex-col">
+                            <div class="text-sm font-medium opacity-80 uppercase tracking-wider">Total Fee Collected in
+                                {{ getSelectedMonthLabel() }} {{ filterForm.value.year }}</div>
+                            <div class="text-4xl font-black mt-1">{{ stats?.total_amount |
+                                currency:'PKR':'symbol':'1.0-0' }}
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white/10 rounded-full">
+                            <mat-icon class="icon-size-10 text-white" svgIcon="heroicons_outline:banknotes"></mat-icon>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4 text-xs font-bold relative z-10">
+                        <span class="bg-white/20 px-2 py-1 rounded mr-2">{{ stats?.count }} Transactions</span>
+                        <span class="opacity-80 font-normal">Audit-ready documentation and history</span>
+                    </div>
+                    <!-- Background Decor -->
+                    <div class="absolute -right-8 -top-8 text-white/5">
+                        <mat-icon class="icon-size-48" svgIcon="heroicons_outline:banknotes"></mat-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="bg-card shadow rounded-2xl mb-8 p-6">
+                <form [formGroup]="filterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Search -->
+                    <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                        <mat-label>Search Receipt or Student</mat-label>
+                        <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"
+                            class="icon-size-5 mr-2"></mat-icon>
+                        <input matInput formControlName="search" placeholder="Enter keywords...">
+                    </mat-form-field>
+
+                    <!-- Class Filter -->
+                    <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                        <mat-label>Class</mat-label>
+                        <mat-select formControlName="class_id">
+                            <mat-option [value]="null">All Classes</mat-option>
+                            <mat-option *ngFor="let class of classes" [value]="class.id">
+                                {{ class.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Month Filter -->
+                    <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                        <mat-label>Month</mat-label>
+                        <mat-select formControlName="month">
+                            <mat-option *ngFor="let m of months" [value]="m.value">
+                                {{ m.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Year Filter -->
+                    <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
+                        <mat-label>Year</mat-label>
+                        <mat-select formControlName="year">
+                            <mat-option *ngFor="let y of years" [value]="y">
+                                {{ y }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </form>
+            </div>
+
+            <!-- Data Table -->
+            <div class="flex flex-col flex-auto overflow-hidden bg-card shadow rounded-2xl border">
+                <div class="overflow-x-auto relative min-h-64">
+                    <table mat-table [dataSource]="dataSource"
+                        class="w-full min-w-max border-separate border-spacing-0">
+
+                        <ng-container matColumnDef="student">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Student
+                                Info </th>
+                            <td mat-cell *matCellDef="let element">
+                                <div class="flex flex-col py-3">
+                                    <span class="font-semibold text-gray-800">{{element.student?.name}}</span>
+                                    <span class="text-xs text-secondary">{{element.student?.class?.name}} (Roll:
+                                        {{element.student?.roll_no}})</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="receipt_no">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Receipt
+                                No. </th>
+                            <td mat-cell *matCellDef="let element" class="font-bold text-primary">
+                                {{element.receipt_no}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="invoice">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Settled
+                                Months
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                                <div class="flex flex-wrap gap-1 max-w-40">
+                                    <span *ngFor="let alloc of element.allocations"
+                                        class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100 font-medium text-[10px] uppercase">
+                                        {{alloc.invoice?.month}}/{{alloc.invoice?.year}}
+                                    </span>
+                                    <span *ngIf="!element.allocations?.length" class="text-xs text-hint italic">Advance
+                                        / Unallocated</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="amount">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Total Paid
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                                <span class="font-extrabold text-primary text-lg">
+                                    {{element.total_amount | currency:'PKR':'symbol':'1.0-0'}}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="method">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Payment
+                                Method
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                                <div class="flex items-center">
+                                    <mat-icon class="icon-size-4 mr-2" [ngClass]="{
+                                        'text-green-600': element.payment_method === 'cash',
+                                        'text-blue-600': element.payment_method === 'bank_transfer',
+                                        'text-purple-600': element.payment_method === 'online',
+                                        'text-orange-600': element.payment_method === 'cheque'
+                                    }"
+                                        [svgIcon]="methodIcons[element.payment_method] || 'heroicons_outline:credit-card'"></mat-icon>
+                                    <span class="text-sm font-medium">{{element.payment_method | titlecase}}</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="date">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Received
+                                At </th>
+                            <td mat-cell *matCellDef="let element" class="text-secondary text-sm">
+                                {{element.payment_date | date:'dd MMM, yyyy'}}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"></th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-icon-button [routerLink]="['/fee/payments', element.id]"
+                                    matTooltip="View & Print Receipt">
+                                    <mat-icon svgIcon="heroicons_outline:eye"
+                                        class="icon-size-5 text-secondary"></mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                            [routerLink]="['/fee/payments', row.id]"
+                            class="hover:bg-gray-50 transition-colors cursor-pointer group"></tr>
+                    </table>
+
+                    <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="7"></app-table-skeleton>
+
+                    <div *ngIf="!isLoading && dataSource.data.length === 0"
+                        class="flex flex-col items-center justify-center p-24 text-center">
+                        <div class="p-6 bg-gray-100 rounded-full mb-4">
+                            <mat-icon svgIcon="heroicons_outline:document-magnifying-glass"
+                                class="icon-size-16 text-hint"></mat-icon>
+                        </div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">No payments tracked for this
+                            criteria
+                        </div>
+                        <div class="mt-1 text-secondary max-w-xs">Adjust your filters or try a different search term to
+                            find the
+                            records you're looking for.</div>
+                    </div>
+                </div>
+
+                <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                    (page)="onPageChange($event)" class="border-t bg-gray-50"></mat-paginator>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

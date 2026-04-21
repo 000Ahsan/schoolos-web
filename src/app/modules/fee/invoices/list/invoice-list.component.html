@@ -40,9 +40,38 @@
                             <mat-option value="pending">Pending</mat-option>
                             <mat-option value="partial">Partial</mat-option>
                             <mat-option value="overdue">Overdue</mat-option>
+                            <mat-option value="waived">Waived</mat-option>
                         </mat-select>
                     </mat-form-field>
                 </form>
+            </div>
+
+            <!-- Student Ledger Summary (Visible when student filtered) -->
+            <div *ngIf="studentLedger" class="mb-8 p-6 bg-primary-50 rounded-2xl border border-primary-100 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-white rounded-xl shadow-sm">
+                        <mat-icon class="text-primary-600 icon-size-6" svgIcon="heroicons_outline:academic-cap"></mat-icon>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-primary-600 uppercase tracking-wider">Student Ledger</div>
+                        <div class="text-2xl font-bold text-gray-900 leading-tight">Financial Summary</div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-12">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Total Charged</span>
+                        <span class="text-xl font-bold text-gray-900">{{ studentLedger.totalCharged | currency:'PKR':'symbol':'1.0-0' }}</span>
+                    </div>
+                    <div class="flex flex-col border-l border-primary-200 pl-12">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Total Paid</span>
+                        <span class="text-xl font-bold text-green-600">{{ studentLedger.totalPaid | currency:'PKR':'symbol':'1.0-0' }}</span>
+                    </div>
+                    <div class="flex flex-col border-l border-primary-200 pl-12">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Outstanding Arrears</span>
+                        <span class="text-3xl font-extrabold text-red-600">{{ studentLedger.total_outstanding | currency:'PKR':'symbol':'1.0-0' }}</span>
+                    </div>
+                </div>
             </div>
 
             <div class="flex flex-col flex-auto overflow-hidden bg-white shadow rounded-2xl">
@@ -94,6 +123,18 @@
                             </td>
                         </ng-container>
 
+                        <ng-container matColumnDef="total_due">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Total Due 
+                                <mat-icon class="icon-size-3 ml-1 text-hint" svgIcon="heroicons_mini:information-circle" matTooltip="Includes all arrears"></mat-icon>
+                            </th>
+                            <td mat-cell *matCellDef="let invoice" class="font-bold"> 
+                                <span [ngClass]="invoice.student_total_due > 0 ? 'text-red-600' : 'text-green-600'">
+                                    {{invoice.student_total_due | currency:'PKR':'symbol':'1.0-0'}}
+                                </span>
+                            </td>
+                        </ng-container>
+
                         <ng-container matColumnDef="due_date">
                             <th mat-header-cell *matHeaderCellDef
                                 class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Due Date
@@ -112,7 +153,8 @@
                                         'bg-green-100 text-green-800': invoice.status === 'paid',
                                         'bg-yellow-100 text-yellow-800': invoice.status === 'pending',
                                         'bg-blue-100 text-blue-800': invoice.status === 'partial',
-                                        'bg-red-100 text-red-800': invoice.status === 'overdue'
+                                        'bg-red-100 text-red-800': invoice.status === 'overdue',
+                                        'bg-purple-100 text-purple-800': invoice.status === 'waived'
                                     }">
                                     {{invoice.status}}
                                 </span>
@@ -133,9 +175,10 @@
                                     matTooltip="View Details">
                                     <mat-icon svgIcon="heroicons_outline:eye"></mat-icon>
                                 </button>
-                                <button *ngIf="invoice.status === 'pending' || invoice.status === 'overdue'" 
-                                        mat-icon-button color="warn" (click)="$event.stopPropagation(); deleteInvoice(invoice)"
-                                        matTooltip="Delete Voucher">
+                                <button *ngIf="invoice.status === 'pending' || invoice.status === 'overdue'"
+                                    mat-icon-button color="warn"
+                                    (click)="$event.stopPropagation(); deleteInvoice(invoice)"
+                                    matTooltip="Delete Voucher">
                                     <mat-icon svgIcon="heroicons_outline:trash"></mat-icon>
                                 </button>
                             </td>
@@ -147,7 +190,8 @@
                             [routerLink]="['/fee/invoices', row.id]"></tr>
                     </table>
 
-                    <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="8"></app-table-skeleton>
+                    <app-table-skeleton *ngIf="isLoading && dataSource.data.length === 0" [rowCount]="10"
+                        [columnCount]="8"></app-table-skeleton>
 
                     <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center text-secondary">
                         No fee vouchers found matching filters.
@@ -208,7 +252,7 @@
 
                 <div class="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm">
                     <div class="font-semibold mb-1 italic">Important Note:</div>
-                    This process will calculate tuition fees, arrears, and active discounts for all active students in
+                    This process will calculate tuition fees, and active discounts for all active students in
                     the selected classes.
                 </div>
             </div>
@@ -217,8 +261,6 @@
                 <button mat-stroked-button (click)="closeDrawer()" [disabled]="isGenerating">Cancel</button>
                 <button mat-flat-button color="primary" [disabled]="generateForm.invalid || isGenerating"
                     (click)="generateVouchers()">
-                    <mat-progress-spinner *ngIf="isGenerating" diameter="20" mode="indeterminate"
-                        class="mr-2"></mat-progress-spinner>
                     Generate
                 </button>
             </div>

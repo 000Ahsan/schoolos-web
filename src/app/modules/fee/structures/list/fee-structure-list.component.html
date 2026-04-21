@@ -1,4 +1,4 @@
-<mat-drawer-container class="flex-auto h-full w-full bg-transparent">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
     <mat-drawer-content class="flex flex-col flex-auto min-w-0">
         <div class="flex flex-col flex-auto p-8 pt-10">
             <div class="flex items-center justify-between w-full mb-8">
@@ -105,8 +105,9 @@
     </mat-drawer-content>
 
     <!-- Side Drawer Form -->
-    <mat-drawer #drawer class="w-full sm:w-96 border-l dark:bg-gray-900" position="end" mode="over">
+    <mat-drawer #drawer class="w-full sm:w-96 border-l dark:bg-gray-900 shadow-2xl" position="end" mode="over">
         <div class="flex flex-col h-full bg-card">
+            <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b">
                 <div class="text-lg font-medium">{{ selectedId ? 'Edit Fee Structure' : 'Add Fee Structure' }}</div>
                 <button mat-icon-button (click)="closeDrawer()">
@@ -114,6 +115,7 @@
                 </button>
             </div>
 
+            <!-- Scrollable Content -->
             <div class="flex-auto px-6 py-8 overflow-y-auto w-full">
                 <form [formGroup]="form" class="flex flex-col gap-4">
                     <mat-form-field appearance="outline" class="w-full">
@@ -160,6 +162,7 @@
                 </form>
             </div>
 
+            <!-- Footer -->
             <div class="flex items-center justify-end px-6 py-4 border-t gap-4">
                 <button mat-stroked-button (click)="closeDrawer()">Cancel</button>
                 <button mat-flat-button color="primary" [disabled]="form.invalid || isSaving"

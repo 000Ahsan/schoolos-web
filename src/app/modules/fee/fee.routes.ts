@@ -4,6 +4,7 @@ import { InvoiceListComponent } from './invoices/list/invoice-list.component';
 import { InvoiceDetailComponent } from './invoices/detail/invoice-detail.component';
 import { DefaulterListComponent } from './defaulters/list/defaulter-list.component';
 import { PaymentListComponent } from './payments/list/payment-list.component';
+import { PaymentDetailComponent } from './payments/detail/payment-detail.component';
 
 export default [
     { path: '', redirectTo: 'structures', pathMatch: 'full' },
@@ -12,4 +13,5 @@ export default [
     { path: 'invoices/:id', component: InvoiceDetailComponent },
     { path: 'defaulters', component: DefaulterListComponent },
     { path: 'payments', component: PaymentListComponent },
+    { path: 'payments/:id', component: PaymentDetailComponent },
 ] as Routes;

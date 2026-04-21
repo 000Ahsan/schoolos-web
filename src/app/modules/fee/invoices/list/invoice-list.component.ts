@@ -57,7 +57,7 @@ export class InvoiceListComponent implements OnInit {
 
     @ViewChild('drawer') drawer: MatDrawer;
 
-    displayedColumns = ['student_name', 'invoice_no', 'class', 'billing_month', 'amount', 'due_date', 'status', 'actions'];
+    displayedColumns = ['student_name', 'invoice_no', 'class', 'billing_month', 'amount', 'total_due', 'due_date', 'status', 'actions'];
     dataSource = new MatTableDataSource<any>([]);
     isLoading = true;
     isGenerating = false;
@@ -65,14 +65,15 @@ export class InvoiceListComponent implements OnInit {
     classesList: any[] = [];
     generateForm: FormGroup;
     schoolSettings: any;
+    studentLedger: any = null;
 
     constructor() {
         this.generateForm = this._fb.group({
             billing_month: [new Date().toISOString().substring(0, 7), Validators.required],
             due_date: [{ value: '', disabled: true }, Validators.required],
             classes: [[], Validators.required],
-            include_admission: [true],
-            include_annual: [true]
+            include_admission: [false],
+            include_annual: [false]
         });
 
         // Auto-calculate due date when billing month changes
@@ -142,6 +143,19 @@ export class InvoiceListComponent implements OnInit {
                 this._snackBar.open('Failed to load vouchers', 'Close');
             }
         });
+
+        // Fetch ledger if student is filtered
+        if (params.student_id) {
+            this._apiService.getStudentLedger(params.student_id).subscribe(res => {
+                this.studentLedger = {
+                    ...res,
+                    totalCharged: res.invoices.reduce((acc, inv) => acc + inv.amount, 0),
+                    totalPaid: res.invoices.reduce((acc, inv) => acc + inv.paid, 0)
+                };
+            });
+        } else {
+            this.studentLedger = null;
+        }
     }
 
     onPageChange(event: PageEvent) {
@@ -214,7 +228,7 @@ export class InvoiceListComponent implements OnInit {
 
         const confirmation = this._fuseConfirmationService.open({
             title: 'Delete Voucher',
-            message: `Are you sure you want to delete invoice ${invoice.invoice_no}? If this was part of a carried-forward chain, older balances will be restored.`,
+            message: `Are you sure you want to delete invoice ${invoice.invoice_no}? This action cannot be undone.`,
             actions: {
                 confirm: { label: 'Delete', color: 'warn' }
             }

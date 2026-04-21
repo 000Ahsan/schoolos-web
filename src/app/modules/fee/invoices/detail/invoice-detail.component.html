@@ -20,7 +20,8 @@
                 <form [formGroup]="paymentForm" class="flex flex-col gap-6">
 
                     <div class="p-4 bg-primary-50 rounded-lg border border-primary-100 mb-2">
-                        <div class="text-primary-700 font-semibold text-lg">Balance Due: {{ voucher?.balance |
+                        <div class="text-primary-700 font-semibold text-lg">Total Due (Incl. Arrears): {{
+                            voucher?.total_payable |
                             currency:'PKR':'symbol':'1.0-0' }}</div>
                         <div class="text-primary-600 text-sm italic">Enter the amount received from the guardian.</div>
                     </div>
@@ -185,9 +186,8 @@
                                                 'bg-green-50 text-green-700 border-green-200': voucher.status === 'paid',
                                                 'bg-yellow-50 text-yellow-700 border-yellow-200': voucher.status === 'pending',
                                                 'bg-blue-50 text-blue-700 border-blue-200': voucher.status === 'partial',
-                                                'bg-red-50 text-red-700 border-red-200': voucher.status === 'overdue',
-                                                'bg-gray-100 text-gray-600 border-gray-300': voucher.status === 'carried_forward'
-                                            }">{{ voucher.status === 'carried_forward' ? 'Consolidated' : voucher.status }}</span>
+                                                'bg-red-50 text-red-700 border-red-200': voucher.status === 'overdue'
+                                            }">{{ voucher.status }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -206,24 +206,49 @@
                                     <!-- Current Charges -->
                                     <tr class="border-b">
                                         <td class="py-4 px-2">
-                                            <div class="font-medium">Current Monthly Charges</div>
-                                            <div class="text-xs text-secondary italic">Tuition and standard monthly fees
-                                            </div>
+                                            <div class="font-medium">{{ voucher.year + '-' + (voucher.month < 10 ? '0'
+                                                    : '' ) + voucher.month + '-01T12:00:00' | date:'MMMM yyyy' }}
+                                                    Charges</div>
+                                                    <div class="text-xs text-secondary italic">Tuition and standard
+                                                        monthly fees
+                                                    </div>
                                         </td>
                                         <td class="py-4 px-2 text-right">{{ voucher.current_charges |
                                             currency:'PKR':'symbol':'1.0-0' }}</td>
                                     </tr>
 
-                                    <!-- Arrears -->
-                                    <tr class="border-b text-red-600" *ngIf="voucher.arrears > 0">
-                                        <td class="py-4 px-2">
-                                            <div class="font-medium">Outstanding Arrears</div>
-                                            <div class="text-xs text-red-400 italic font-normal">Unpaid balances from previous months consolidated here</div>
-                                        </td>
-                                        <td class="py-4 px-2 text-right">{{ voucher.arrears |
-                                            currency:'PKR':'symbol':'1.0-0' }}
-                                        </td>
-                                    </tr>
+                                    <!-- Additional Charges (Admission, Annual, etc) -->
+                                    <ng-container *ngIf="voucher.additional_charges_breakdown?.length > 0">
+                                        <tr class="border-b"
+                                            *ngFor="let charge of voucher.additional_charges_breakdown">
+                                            <td class="py-4 px-2">
+                                                <div class="font-medium">{{ charge.name }}</div>
+                                                <div class="text-xs text-secondary italic">
+                                                    {{ charge.period === 'one_time' ? 'One Time Fee' : 'Annual Fee' }}
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-2 text-right">{{ charge.amount |
+                                                currency:'PKR':'symbol':'1.0-0' }}</td>
+                                        </tr>
+                                    </ng-container>
+
+                                    <!-- Previous Arrears Breakdown -->
+                                    <ng-container *ngIf="voucher.previous_arrears?.length > 0">
+                                        <tr class="border-b bg-red-50/10 text-red-700"
+                                            *ngFor="let arrear of voucher.previous_arrears">
+                                            <td class="py-4 px-2">
+                                                <div class="font-bold uppercase text-xs tracking-tight">Previous Balance
+                                                    (Arrears)</div>
+                                                <div class="font-medium">Voucher {{ arrear.invoice_no }} ({{
+                                                    (arrear.year + '-' + (arrear.month < 10 ? '0' : '' ) + arrear.month
+                                                        + '-01' ) | date:'MMMM yyyy' }})</div>
+                                                        <div class="text-xs text-red-600 italic">Remaining unpaid
+                                                            balance from previous month</div>
+                                            </td>
+                                            <td class="py-4 px-2 text-right font-bold">{{ arrear.balance |
+                                                currency:'PKR':'symbol':'1.0-0' }}</td>
+                                        </tr>
+                                    </ng-container>
 
                                     <!-- Applied Discounts Breakdown -->
                                     <ng-container *ngIf="voucher.discount_amount > 0">
@@ -267,21 +292,34 @@
                         <div class="flex justify-end mt-8">
                             <div class="w-full sm:w-1/2">
                                 <div class="flex justify-between py-2 border-b">
-                                    <span class="font-medium text-secondary">Total Payable Amount:</span>
+                                    <span class="font-medium text-secondary">Voucher Total (Net):</span>
                                     <span class="font-bold">{{ voucher.net_amount | currency:'PKR':'symbol':'1.0-0'
                                         }}</span>
                                 </div>
+                                <div class="flex justify-between py-2 border-b text-red-600 italic bg-red-50/30 px-2"
+                                    *ngIf="voucher.previous_arrears?.length > 0">
+                                    <span
+                                        class="font-medium uppercase text-xs tracking-wider flex items-center h-full">Total
+                                        Arrears:</span>
+                                    <span class="font-bold text-lg">{{ (voucher.total_payable - voucher.balance) |
+                                        currency:'PKR':'symbol':'1.0-0' }}</span>
+                                </div>
                                 <div class="flex justify-between py-2 border-b">
-                                    <span class="font-medium text-secondary">Received Amount:</span>
-                                    <span class="text-green-600 font-bold">{{ voucher.amount_paid |
+                                    <span class="font-medium text-secondary italic">Already Received:</span>
+                                    <span class="text-green-600 font-bold">-{{ voucher.paid_amount |
                                         currency:'PKR':'symbol':'1.0-0' }}</span>
                                 </div>
                                 <div
                                     class="flex justify-between py-4 mt-2 bg-gray-50 px-4 rounded-lg text-2xl font-extrabold border-2 border-gray-200">
-                                    <span>Balance Due:</span>
-                                    <span [class.text-red-600]="voucher.balance > 0"
-                                        [class.text-green-600]="voucher.balance <= 0">
-                                        {{ voucher.balance | currency:'PKR':'symbol':'1.0-0' }}
+                                    <div class="flex flex-col">
+                                        <span>Total Payable:</span>
+                                        <div
+                                            class="text-xs font-medium text-secondary uppercase tracking-widest -mt-1 leading-none">
+                                            Gross Balance Due</div>
+                                    </div>
+                                    <span [class.text-red-600]="voucher.total_payable > 0"
+                                        [class.text-green-600]="voucher.total_payable <= 0">
+                                        {{ voucher.total_payable | currency:'PKR':'symbol':'1.0-0' }}
                                     </span>
                                 </div>
                             </div>

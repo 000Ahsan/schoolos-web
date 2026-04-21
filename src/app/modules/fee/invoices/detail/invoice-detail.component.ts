@@ -85,7 +85,7 @@ export class InvoiceDetailComponent implements OnInit {
 
     openPaymentDrawer() {
         this.paymentForm.patchValue({
-            amount_paid: this.voucher.balance,
+            amount_paid: this.voucher.total_payable,
             payment_date: new Date(),
             remarks: ''
         });
