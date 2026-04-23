@@ -81,8 +81,13 @@
 
                     <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="5"></app-table-skeleton>
 
-                    <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center text-secondary">
-                        No academic years found.
+                    <div *ngIf="!isLoading && dataSource.data.length === 0"
+                        class="flex flex-col items-center justify-center p-24 text-center">
+                        <div class="p-6 bg-gray-100 rounded-full mb-4">
+                            <mat-icon svgIcon="heroicons_outline:calendar" class="icon-size-16 text-hint"></mat-icon>
+                        </div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">No academic years found</div>
+                        <div class="mt-1 text-secondary max-w-xs">Create an academic year to manage terms, student enrollments, and promotions.</div>
                     </div>
                 </div>
             </div>

@@ -88,9 +88,13 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
 
                 <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="3"></app-table-skeleton>
 
-                <div *ngIf="!isLoading && students.length === 0" class="p-16 text-center text-secondary">
-                    <mat-icon svgIcon="heroicons_outline:user-group" class="icon-size-12 mb-4 text-hint"></mat-icon>
-                    <div>No students currently enrolled in this class.</div>
+                <div *ngIf="!isLoading && students.length === 0"
+                    class="flex flex-col items-center justify-center p-16 text-center">
+                    <div class="p-6 bg-gray-100 rounded-full mb-4">
+                        <mat-icon svgIcon="heroicons_outline:user-group" class="icon-size-16 text-hint"></mat-icon>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight text-secondary">No students enrolled</div>
+                    <div class="mt-1 text-secondary max-w-xs">There are no students currently enrolled in this class and section.</div>
                 </div>
             </div>
 

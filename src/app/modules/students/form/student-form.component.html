@@ -259,8 +259,13 @@
                     <tr mat-row *matRowDef="let row; columns: discountColumns;" class="hover:bg-gray-50 transition-colors group"></tr>
                 </table>
 
-                <div *ngIf="discounts.length === 0" class="p-8 text-center text-hint">
-                    No discounts configured
+                <div *ngIf="discounts.length === 0"
+                    class="flex flex-col items-center justify-center p-12 text-center">
+                    <div class="p-4 bg-gray-100 rounded-full mb-3">
+                        <mat-icon svgIcon="heroicons_outline:receipt-percent" class="icon-size-10 text-hint"></mat-icon>
+                    </div>
+                    <div class="text-xl font-bold tracking-tight text-secondary">No discounts configured</div>
+                    <div class="mt-1 text-secondary max-w-xs text-sm">Special fee concessions and scholarships will appear here.</div>
                 </div>
             </div>
         </mat-card>

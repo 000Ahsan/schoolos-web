@@ -111,9 +111,13 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
 
                 <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="6"></app-table-skeleton>
 
-                <div *ngIf="!isLoading && invoices.length === 0" class="p-16 text-center text-secondary">
-                    <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-12 mb-4 text-hint"></mat-icon>
-                    <div>No fee history found for this student.</div>
+                <div *ngIf="!isLoading && invoices.length === 0"
+                    class="flex flex-col items-center justify-center p-16 text-center">
+                    <div class="p-6 bg-gray-100 rounded-full mb-4">
+                        <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-16 text-hint"></mat-icon>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight text-secondary">No fee history found</div>
+                    <div class="mt-1 text-secondary max-w-xs">There are no generated invoices or payment records for this student yet.</div>
                 </div>
             </div>
 

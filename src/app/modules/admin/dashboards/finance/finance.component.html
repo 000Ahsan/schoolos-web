@@ -554,6 +554,15 @@
                             *matFooterRowDef="['recentOrdersTableFooter']"
                         ></tr>
                     </table>
+
+                    <div *ngIf="recentTransactionsDataSource.data.length === 0"
+                        class="flex flex-col items-center justify-center p-12 text-center">
+                        <div class="p-6 bg-gray-100 rounded-full mb-4">
+                            <mat-icon svgIcon="heroicons_outline:circle-stack" class="icon-size-16 text-hint"></mat-icon>
+                        </div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">No transactions found</div>
+                        <div class="mt-1 text-secondary max-w-xs">Financial transactions will appear here once they are processed.</div>
+                    </div>
                 </div>
             </div>
 

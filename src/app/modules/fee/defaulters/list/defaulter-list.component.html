@@ -106,9 +106,13 @@
                     </table>
 
                         <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="7"></app-table-skeleton>
-                    <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center">
-                        <mat-icon svgIcon="heroicons_outline:check-badge" class="icon-size-12 text-green-500 mb-4"></mat-icon>
-                        <div class="text-lg font-medium text-secondary">Great job! No defaulters found.</div>
+                    <div *ngIf="!isLoading && dataSource.data.length === 0"
+                        class="flex flex-col items-center justify-center p-24 text-center">
+                        <div class="p-6 bg-green-50 rounded-full mb-4">
+                            <mat-icon svgIcon="heroicons_outline:check-badge" class="icon-size-16 text-green-500"></mat-icon>
+                        </div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">Great job! No defaulters found.</div>
+                        <div class="mt-1 text-secondary max-w-xs">All students have cleared their dues or no records match your current filters.</div>
                     </div>
                 </div>
 

@@ -97,9 +97,13 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
 
           <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="5"></app-table-skeleton>
 
-          <div *ngIf="!isLoading && dataSource.data.length === 0" class="p-16 text-center">
-            <mat-icon svgIcon="heroicons_outline:chat-bubble-left-ellipsis" class="icon-size-12 text-hint mb-4"></mat-icon>
-            <div class="text-lg font-medium text-secondary">No WhatsApp messages found matching your search.</div>
+          <div *ngIf="!isLoading && dataSource.data.length === 0"
+              class="flex flex-col items-center justify-center p-24 text-center">
+            <div class="p-6 bg-gray-100 rounded-full mb-4">
+              <mat-icon svgIcon="heroicons_outline:chat-bubble-left-ellipsis" class="icon-size-16 text-hint"></mat-icon>
+            </div>
+            <div class="text-2xl font-bold tracking-tight text-secondary">No WhatsApp records found</div>
+            <div class="mt-1 text-secondary max-w-xs">No notifications have been sent yet or none match your current search criteria.</div>
           </div>
         </div>
         

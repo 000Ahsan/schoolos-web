@@ -130,9 +130,13 @@
 
             <!-- Loading / Empty -->
             <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="8"></app-table-skeleton>
-            <div *ngIf="!isLoading && dataSource.filteredData.length === 0" class="p-16 text-center">
-                <mat-icon svgIcon="heroicons_outline:users" class="icon-size-12 text-hint mb-4"></mat-icon>
-                <div class="text-lg font-medium text-secondary">No students found</div>
+            <div *ngIf="!isLoading && dataSource.filteredData.length === 0"
+                class="flex flex-col items-center justify-center p-24 text-center">
+                <div class="p-6 bg-gray-100 rounded-full mb-4">
+                    <mat-icon svgIcon="heroicons_outline:users" class="icon-size-16 text-hint"></mat-icon>
+                </div>
+                <div class="text-2xl font-bold tracking-tight text-secondary">No students found matching your criteria</div>
+                <div class="mt-1 text-secondary max-w-xs">Adjust your filters or try a different search term to find the records you're looking for.</div>
             </div>
         </div>
 

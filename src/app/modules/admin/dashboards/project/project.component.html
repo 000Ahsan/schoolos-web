@@ -1344,6 +1344,15 @@
                                             "
                                         ></tr>
                                     </table>
+
+                                    <div *ngIf="data.budgetDetails.rows.length === 0"
+                                        class="flex flex-col items-center justify-center p-12 text-center">
+                                        <div class="p-4 bg-gray-100 rounded-full mb-3">
+                                            <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-10 text-hint"></mat-icon>
+                                        </div>
+                                        <div class="text-xl font-bold tracking-tight text-secondary">No budget details found</div>
+                                        <div class="mt-1 text-secondary max-w-xs text-sm">Budget allocation data will be displayed here once configured.</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
