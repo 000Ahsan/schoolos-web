@@ -21,6 +21,7 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
 
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-invoice-list',
@@ -45,7 +46,8 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
         MatCheckboxModule,
         ReactiveFormsModule,
         CurrencyPipe,
-        DatePipe
+        DatePipe,
+        TermPipe
     ],
     templateUrl: './invoice-list.component.html'
 })

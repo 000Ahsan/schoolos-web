@@ -14,6 +14,7 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
 import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-promote-dialog',
@@ -80,7 +81,8 @@ export class PromoteDialogComponent {
         MatDatepickerModule,
         ReactiveFormsModule,
         DatePipe,
-        TableSkeletonComponent
+        TableSkeletonComponent,
+        TermPipe
     ],
     templateUrl: './academic-year-list.component.html'
 })

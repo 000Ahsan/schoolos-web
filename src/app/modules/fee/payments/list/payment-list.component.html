@@ -21,12 +21,12 @@
             <div class="flex-auto overflow-y-auto min-h-0 p-8 space-y-8 bg-white">
                 <!-- Step 1: Search Student -->
                 <div class="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
-                    <div class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-700">1. Identify Student</div>
+                    <div class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-700">1. Identify {{ 'Student' | term }}</div>
                     <mat-form-field class="w-full" appearance="outline" [subscriptSizing]="'dynamic'">
                         <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"
                             class="icon-size-5 mr-3 text-secondary"></mat-icon>
                         <input matInput [formControl]="studentSearchControl" [matAutocomplete]="auto"
-                            placeholder="Type student name or roll number...">
+                            [placeholder]="'Type ' + ('student' | term | lowercase) + ' name or roll number...'">
                         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayStudent"
                             (optionSelected)="onStudentSelected($event.option.value)">
                             <mat-option *ngFor="let student of filteredStudents$ | async" [value]="student"
@@ -189,7 +189,7 @@
                 <form [formGroup]="filterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Search -->
                     <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                        <mat-label>Search Receipt or Student</mat-label>
+                        <mat-label>Search Receipt or {{ 'Student' | term }}</mat-label>
                         <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"
                             class="icon-size-5 mr-2"></mat-icon>
                         <input matInput formControlName="search" placeholder="Enter keywords...">
@@ -197,9 +197,9 @@
 
                     <!-- Class Filter -->
                     <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                        <mat-label>Class</mat-label>
+                        <mat-label>{{ 'Class' | term }}</mat-label>
                         <mat-select formControlName="class_id">
-                            <mat-option [value]="null">All Classes</mat-option>
+                            <mat-option [value]="null">All {{ 'Classes' | term }}</mat-option>
                             <mat-option *ngFor="let class of classes" [value]="class.id">
                                 {{ class.name }}
                             </mat-option>
@@ -236,7 +236,7 @@
 
                         <ng-container matColumnDef="student">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> Student
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> {{'Student' | term}}
                                 Info </th>
                             <td mat-cell *matCellDef="let element">
                                 <div class="flex flex-col py-3">

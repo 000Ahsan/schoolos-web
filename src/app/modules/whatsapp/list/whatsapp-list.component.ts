@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ApiService } from 'app/core/services/api.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
   selector: 'app-whatsapp-list',
@@ -24,7 +25,8 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
     MatFormFieldModule,
     MatInputModule,
     DatePipe,
-    TableSkeletonComponent
+    TableSkeletonComponent,
+    TermPipe
   ],
   templateUrl: './whatsapp-list.component.html'
 })

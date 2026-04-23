@@ -16,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-fee-structure-list',
@@ -35,7 +36,8 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
         MatSelectModule,
         ReactiveFormsModule,
         CurrencyPipe,
-        MatTooltipModule
+        MatTooltipModule,
+        TermPipe
     ],
     templateUrl: './fee-structure-list.component.html'
 })

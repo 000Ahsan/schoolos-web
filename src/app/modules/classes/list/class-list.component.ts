@@ -19,6 +19,7 @@ import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 import { ClassStudentsDialogComponent } from './class-students-dialog.component';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-class-list',
@@ -40,7 +41,8 @@ import { ClassStudentsDialogComponent } from './class-students-dialog.component'
         MatDialogModule,
         MatTooltipModule,
         MatDividerModule,
-        TableSkeletonComponent
+        TableSkeletonComponent,
+        TermPipe
     ],
     templateUrl: './class-list.component.html'
 })

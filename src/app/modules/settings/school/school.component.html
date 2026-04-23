@@ -21,9 +21,6 @@
         </div>
         <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
             <button mat-flat-button [color]="'primary'" [disabled]="form.invalid || isSaving" (click)="save()">
-                @if (isSaving) {
-                <mat-progress-spinner class="mr-2" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
-                }
                 Save Changes
             </button>
         </div>
@@ -50,9 +47,20 @@
 
                     <div class="flex-auto grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                         <mat-form-field appearance="outline" class="sm:col-span-2">
-                            <mat-label>School Name</mat-label>
-                            <input matInput formControlName="school_name" placeholder="Enter school name" required>
+                            <mat-label>Organization Name</mat-label>
+                            <input matInput formControlName="school_name" placeholder="Enter organization name"
+                                required>
                             <mat-icon matPrefix [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+                        </mat-form-field>
+
+                        <!-- Organization Type — owner-only setting that changes app-wide terminology -->
+                        <mat-form-field appearance="outline" class="sm:col-span-2">
+                            <mat-label>Organization Type</mat-label>
+                            <mat-select formControlName="organization_type">
+                                <mat-option value="school">🏫 School</mat-option>
+                                <mat-option value="coaching">📚 Coaching Center</mat-option>
+                                <mat-option value="academy">💻 Computer / Language Academy</mat-option>
+                            </mat-select>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline">
@@ -70,7 +78,7 @@
                         <mat-form-field appearance="outline" class="sm:col-span-2">
                             <mat-label>Full Address</mat-label>
                             <textarea matInput formControlName="address" rows="2"
-                                placeholder="School building address..."></textarea>
+                                placeholder="Organization address..."></textarea>
                             <mat-icon matPrefix [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
                         </mat-form-field>
                     </div>
@@ -101,62 +109,73 @@
                 <div class="mt-8 pt-8 border-t flex flex-col md:flex-row">
                     <div class="flex-auto md:w-1/2 pr-0 md:pr-8">
                         <div class="text-xl font-bold mb-2">WhatsApp Device Connection</div>
-                        <div class="text-secondary mb-6">Connect your school's WhatsApp account to automatically send fee vouchers and reminders. Make sure to connect a device dedicated to your school.</div>
-                        
+                        <div class="text-secondary mb-6">Connect your school's WhatsApp account to automatically send
+                            fee vouchers and reminders. Make sure to connect a device dedicated to your school.</div>
+
                         <div class="flex flex-col gap-4">
-                            <div class="flex items-center justify-between p-4 rounded-xl border bg-gray-50 dark:bg-transparent">
+                            <div
+                                class="flex items-center justify-between p-4 rounded-xl border bg-gray-50 dark:bg-transparent">
                                 <div>
                                     <div class="font-medium">Connection Status</div>
                                     <div class="text-sm mt-1 flex items-center">
                                         @if (whatsappStatus === 'connected' || whatsappStatus === 'authenticated') {
-                                            <div class="w-2.5 h-2.5 rounded-full bg-green-500 mr-2"></div>
-                                            <span class="text-green-600 font-medium">Connected</span>
-                                        } @else if (whatsappStatus === 'initializing' || whatsappStatus === 'qr_ready') {
-                                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
-                                            <span class="text-yellow-600 font-medium">Connecting...</span>
+                                        <div class="w-2.5 h-2.5 rounded-full bg-green-500 mr-2"></div>
+                                        <span class="text-green-600 font-medium">Connected</span>
+                                        } @else if (whatsappStatus === 'initializing' || whatsappStatus === 'qr_ready')
+                                        {
+                                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
+                                        <span class="text-yellow-600 font-medium">Connecting...</span>
                                         } @else {
-                                            <div class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></div>
-                                            <span class="text-red-500 font-medium">Disconnected</span>
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></div>
+                                        <span class="text-red-500 font-medium">Disconnected</span>
                                         }
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     @if (whatsappStatus === 'connected' || whatsappStatus === 'authenticated') {
-                                        <button type="button" mat-stroked-button color="warn" (click)="logoutWhatsApp()">
-                                            Disconnect
-                                        </button>
+                                    <button type="button" mat-stroked-button color="warn" (click)="logoutWhatsApp()">
+                                        Disconnect
+                                    </button>
                                     } @else if (whatsappStatus === 'initializing') {
-                                        <mat-spinner [diameter]="24"></mat-spinner>
+                                    <mat-spinner [diameter]="24"></mat-spinner>
                                     } @else {
-                                        <button type="button" mat-flat-button color="primary" (click)="initWhatsApp()">
-                                            Connect Device
-                                        </button>
+                                    <button type="button" mat-flat-button color="primary" (click)="initWhatsApp()">
+                                        Connect Device
+                                    </button>
                                     }
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="flex-auto md:w-1/2 mt-8 md:mt-0 flex items-center justify-center border-l border-gray-200 dark:border-gray-700">
+
+                    <div
+                        class="flex-auto md:w-1/2 mt-8 md:mt-0 flex items-center justify-center border-l border-gray-200 dark:border-gray-700">
                         <div class="text-center p-6 flex flex-col items-center">
                             @if (whatsappStatus === 'qr_ready' && whatsappQr) {
-                                <div class="mb-4">
-                                    <img [src]="whatsappQr" class="w-64 h-64 border p-2 rounded-xl bg-white shadow-sm" alt="WhatsApp QR Code">
-                                </div>
-                                <div class="text-sm text-secondary font-medium animate-pulse">
-                                    Scan this QR code using WhatsApp on your phone.<br>Open WhatsApp > Settings > Linked Devices.
-                                </div>
+                            <div class="mb-4">
+                                <img [src]="whatsappQr" class="w-64 h-64 border p-2 rounded-xl bg-white shadow-sm"
+                                    alt="WhatsApp QR Code">
+                            </div>
+                            <div class="text-sm text-secondary font-medium animate-pulse">
+                                Scan this QR code using WhatsApp on your phone.<br>Open WhatsApp > Settings > Linked
+                                Devices.
+                            </div>
                             } @else if (whatsappStatus === 'connected' || whatsappStatus === 'authenticated') {
-                                <mat-icon class="icon-size-24 text-green-500 mb-4" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
-                                <div class="text-lg font-semibold text-green-600">Successfully Connected</div>
-                                <div class="text-sm text-secondary mt-1">Your WhatsApp device is ready to send messages.</div>
+                            <mat-icon class="icon-size-24 text-green-500 mb-4"
+                                [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                            <div class="text-lg font-semibold text-green-600">Successfully Connected</div>
+                            <div class="text-sm text-secondary mt-1">Your WhatsApp device is ready to send messages.
+                            </div>
                             } @else if (whatsappStatus === 'initializing') {
-                                <mat-progress-spinner [mode]="'indeterminate'" [diameter]="48" class="mb-4"></mat-progress-spinner>
-                                <div class="text-secondary font-medium animate-pulse">Generating Secure QR Code...</div>
+                            <mat-progress-spinner [mode]="'indeterminate'" [diameter]="48"
+                                class="mb-4"></mat-progress-spinner>
+                            <div class="text-secondary font-medium animate-pulse">Generating Secure QR Code...</div>
                             } @else {
-                                <mat-icon class="icon-size-24 text-gray-300 mb-4" [svgIcon]="'heroicons_outline:device-phone-mobile'"></mat-icon>
-                                <div class="text-lg font-medium text-secondary hover:text-primary transition-colors">Start connection to scan QR</div>
+                            <mat-icon class="icon-size-24 text-gray-300 mb-4"
+                                [svgIcon]="'heroicons_outline:device-phone-mobile'"></mat-icon>
+                            <div class="text-lg font-medium text-secondary hover:text-primary transition-colors">Start
+                                connection to scan QR</div>
                             }
                         </div>
                     </div>

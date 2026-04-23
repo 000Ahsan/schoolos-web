@@ -1,5 +1,6 @@
 import { BooleanInput } from '@angular/cdk/coercion';
 import { NgClass } from '@angular/common';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -32,6 +33,7 @@ import { Subject, takeUntil } from 'rxjs';
         FuseVerticalNavigationDividerItemComponent,
         forwardRef(() => FuseVerticalNavigationGroupItemComponent),
         FuseVerticalNavigationSpacerItemComponent,
+        TermPipe,
     ],
 })
 export class FuseVerticalNavigationGroupItemComponent

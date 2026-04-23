@@ -17,6 +17,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 import { ApiService } from 'app/core/services/api.service';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-defaulter-list',
@@ -37,7 +38,8 @@ import { ApiService } from 'app/core/services/api.service';
         MatSelectModule,
         MatSidenavModule,
         CurrencyPipe,
-        DatePipe
+        DatePipe,
+        TermPipe
     ],
     templateUrl: './defaulter-list.component.html'
 })
@@ -93,7 +95,7 @@ export class DefaulterListComponent implements OnInit {
 
     loadDefaulters() {
         this.isLoading = true;
-        
+
         const params = {
             page: this.pageIndex + 1,
             per_page: this.pageSize,

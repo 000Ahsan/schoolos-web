@@ -19,6 +19,7 @@ import { debounceTime, distinctUntilChanged, filter, map, Observable, switchMap 
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 
 import { ApiService } from 'app/core/services/api.service';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
   selector: 'app-payment-list',
@@ -44,7 +45,8 @@ import { ApiService } from 'app/core/services/api.service';
     MatButtonModule,
     CurrencyPipe,
     DatePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    TermPipe
   ]
 })
 export class PaymentListComponent implements OnInit {

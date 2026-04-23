@@ -19,6 +19,7 @@ import { ApiService } from 'app/core/services/api.service';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
 import { StudentFeeHistoryDialogComponent } from './student-fee-history-dialog.component';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-student-list',
@@ -39,7 +40,8 @@ import { StudentFeeHistoryDialogComponent } from './student-fee-history-dialog.c
         MatTooltipModule,
         FormsModule,
         ReactiveFormsModule,
-        TableSkeletonComponent
+        TableSkeletonComponent,
+        TermPipe
     ],
     templateUrl: './student-list.component.html'
 })

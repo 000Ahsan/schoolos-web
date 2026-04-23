@@ -5,9 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from 'app/core/services/api.service';
+import { TerminologyService } from 'app/core/terminology/terminology.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 @Component({
@@ -20,6 +22,7 @@ import { environment } from 'environments/environment';
         MatFormFieldModule,
         MatIconModule,
         MatInputModule,
+        MatSelectModule,
         MatProgressSpinnerModule,
         MatSnackBarModule
     ],
@@ -30,6 +33,7 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
     private _http = inject(HttpClient);
     private _fb = inject(FormBuilder);
     private _snackBar = inject(MatSnackBar);
+    private _terminologyService = inject(TerminologyService);
 
     form: FormGroup;
     isLoading = true;
@@ -41,9 +45,12 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
     whatsappQr: string | null = null;
     whatsappPollingInterval: any;
 
+    private _originalOrgType: string = 'school';
+
     constructor() {
         this.form = this._fb.group({
             school_name: ['', Validators.required],
+            organization_type: ['school'],
             address: [''],
             phone: [''],
             email: ['', [Validators.email]],
@@ -59,6 +66,8 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
             next: (settings) => {
                 if (settings) {
                     this.form.patchValue(settings);
+                    // Capture original org type to detect changes on save
+                    this._originalOrgType = settings.organization_type ?? 'school';
                     if (settings.logo_url) {
                         this.logoPreview = settings.logo_url;
                     }
@@ -99,10 +108,21 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
         this._apiService.updateSchoolSettings(this.form.value).subscribe({
             next: () => {
                 this.isSaving = false;
-                this._snackBar.open('Settings updated successfully', 'Close', { duration: 3000 });
-                // Check WhatsApp status again in case url changed
-                if (this.tenantId) {
-                    this.checkWhatsAppStatus();
+                const newOrgType = this.form.get('organization_type')?.value ?? 'school';
+                const orgTypeChanged = newOrgType !== this._originalOrgType;
+
+                this._terminologyService.setOrganizationType(newOrgType);
+
+                if (orgTypeChanged) {
+                    // Reload so all pipe instances and page labels refresh
+                    this._snackBar.open('Organization type changed — reloading…', 'OK', { duration: 2500 });
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    this._snackBar.open('Settings updated successfully', 'Close', { duration: 3000 });
+                    // Check WhatsApp status again in case url changed
+                    if (this.tenantId) {
+                        this.checkWhatsAppStatus();
+                    }
                 }
             },
             error: () => {

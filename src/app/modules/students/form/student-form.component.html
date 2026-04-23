@@ -3,16 +3,16 @@
     <div class="bg-card px-8 pt-10 pb-6 border-b">
         <div class="flex items-center mb-4 text-secondary cursor-pointer" [routerLink]="['/students']">
             <mat-icon class="icon-size-5" svgIcon="heroicons_outline:arrow-left"></mat-icon>
-            <span class="ml-2 font-medium">Back to Students</span>
+            <span class="ml-2 font-medium">Back to {{ 'Students' | term }}</span>
         </div>
         <div class="flex items-center justify-between">
             <div class="text-3xl font-semibold tracking-tight leading-8">
-                {{ studentId ? 'Edit Student' : 'New Student' }}
+                {{ studentId ? ('Edit ' + ('Student' | term)) : ('New ' + ('Student' | term)) }}
             </div>
             <div class="flex items-center space-x-4">
                 <button mat-flat-button color="primary" [disabled]="isLoading" (click)="save()">
                     <mat-icon svgIcon="heroicons_solid:check"></mat-icon>
-                    <span class="ml-2">Save Student</span>
+                    <span class="ml-2">Save {{ 'Student' | term }}</span>
                 </button>
             </div>
         </div>
@@ -77,12 +77,12 @@
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Class</mat-label>
+                            <mat-label>{{ 'Class' | term }}</mat-label>
                             <mat-select formControlName="class_id" required>
                                 <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }} - {{ cls.section
                                     }}</mat-option>
                             </mat-select>
-                            <mat-error *ngIf="form.get('class_id')?.hasError('required')">Class is required</mat-error>
+                            <mat-error *ngIf="form.get('class_id')?.hasError('required')">{{ 'Class' | term }} is required</mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full">

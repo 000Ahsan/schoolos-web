@@ -5,8 +5,8 @@
             <div class="flex items-center justify-between w-full mb-8">
                 <div>
                     <div class="text-3xl font-semibold tracking-tight leading-8">Fee Structures</div>
-                    <div class="font-medium tracking-tight text-secondary">Define tuition and special fees per class and
-                        term</div>
+                    <div class="font-medium tracking-tight text-secondary">Define tuition and special fees per {{'class' | term | lowercase}} and
+                        {{'Academic Year' | term | lowercase}}</div>
                 </div>
                 <div>
                     <button mat-flat-button color="primary" (click)="openDrawer('add')">
@@ -22,8 +22,7 @@
 
                         <ng-container matColumnDef="academic_year">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Academic
-                                Year </th>
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{ 'Academic Year' | term }} </th>
                             <td mat-cell *matCellDef="let row"> {{row.academic_year?.label || '---'}} </td>
                         </ng-container>
 
@@ -58,7 +57,7 @@
 
                         <ng-container matColumnDef="classes_applied">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Classes
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Classes' | term}}
                             </th>
                             <td mat-cell *matCellDef="let row">
                                 <div class="flex flex-wrap items-center gap-1 max-w-sm">
@@ -106,7 +105,7 @@
                         </div>
                         <div class="text-2xl font-bold tracking-tight text-secondary">No fee structures found</div>
                         <div class="mt-1 text-secondary max-w-xs">Define your first fee structure to start managing
-                            student billing.</div>
+                            {{'student' | term | lowercase}} billing.</div>
                     </div>
                 </div>
             </div>
@@ -128,23 +127,23 @@
             <div class="flex-auto px-6 py-8 overflow-y-auto w-full">
                 <form [formGroup]="form" class="flex flex-col gap-4">
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Academic Year</mat-label>
+                        <mat-label>{{ 'Academic Year' | term }}</mat-label>
                         <mat-select formControlName="academic_year_id" required>
                             <mat-option *ngFor="let year of academicYears" [value]="year.id">{{ year.label
                                 }}</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="form.get('academic_year_id')?.hasError('required')">Academic Year is
+                        <mat-error *ngIf="form.get('academic_year_id')?.hasError('required')">{{ 'Academic Year' | term }} is
                             required</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Target Classes</mat-label>
+                        <mat-label>Target {{ 'Classes' | term }}</mat-label>
                         <mat-select formControlName="classes" multiple required>
                             <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name + ' - ' +
                                 cls.section
                                 }}</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="form.get('classes')?.hasError('required')">At least one class is
+                        <mat-error *ngIf="form.get('classes')?.hasError('required')">At least one {{ 'class' | term | lowercase }} is
                             required</mat-error>
                     </mat-form-field>
 

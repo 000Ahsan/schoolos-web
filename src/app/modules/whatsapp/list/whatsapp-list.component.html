@@ -7,7 +7,7 @@
 
         <div class="mt-4 sm:mt-0 w-full sm:w-80">
             <mat-form-field appearance="outline" class="w-full" [subscriptSizing]="'dynamic'">
-                <mat-label>Search phone or student...</mat-label>
+                <mat-label>Search phone or {{'student' | term | lowercase}}...</mat-label>
                 <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass" class="icon-size-5 mr-2"></mat-icon>
                 <input matInput [formControl]="searchControl" placeholder="Search...">
             </mat-form-field>
@@ -20,7 +20,7 @@
                 <!-- Student -->
                 <ng-container matColumnDef="student">
                     <th mat-header-cell *matHeaderCellDef
-                        class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Student </th>
+                        class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Student' | term}} </th>
                     <td mat-cell *matCellDef="let log">
                         <div class="flex flex-col">
                             <span class="font-bold text-primary">{{log.student?.name}}</span>

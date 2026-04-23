@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from 'app/core/services/api.service';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-payment-detail',
@@ -21,7 +22,8 @@ import { ApiService } from 'app/core/services/api.service';
         CurrencyPipe,
         DatePipe,
         TitleCasePipe,
-        RouterLink
+        RouterLink,
+        TermPipe
     ],
     templateUrl: './payment-detail.component.html'
 })

@@ -10,6 +10,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { ApiService } from 'app/core/services/api.service';
 import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/table-skeleton.component';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-dashboard',
@@ -22,7 +23,8 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
         NgApexchartsModule,
         CurrencyPipe,
         DatePipe,
-        TableSkeletonComponent
+        TableSkeletonComponent,
+        TermPipe
     ],
     templateUrl: './dashboard.component.html'
 })

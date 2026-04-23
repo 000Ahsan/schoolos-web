@@ -3,7 +3,7 @@
   <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full mb-8 gap-4">
     <div>
       <div class="text-3xl font-semibold tracking-tight leading-8">Dashboard Overview</div>
-      <div class="font-medium tracking-tight text-secondary">Your School's Real-time Analytics</div>
+      <div class="font-medium tracking-tight text-secondary">Your {{'School' | term}}'s Real-time Analytics</div>
     </div>
   </div>
 
@@ -25,7 +25,7 @@
       <div class="p-6">
         <div class="flex items-center text-primary">
           <mat-icon class="icon-size-5" svgIcon="heroicons_outline:academic-cap"></mat-icon>
-          <div class="ml-2 text-sm font-bold uppercase tracking-wider">Students</div>
+          <div class="ml-2 text-sm font-bold uppercase tracking-wider">{{'Students' | term}}</div>
         </div>
         <div class="mt-4 flex items-baseline">
           <div class="text-4xl font-extrabold leading-none tracking-tight">{{ stats?.total_students || 0 }}</div>
@@ -92,7 +92,7 @@
         </div>
         <div class="mt-4 flex items-baseline">
           <div class="text-4xl font-extrabold leading-none tracking-tight">{{ stats?.defaulter_count || 0 }}</div>
-          <div class="ml-2 text-sm font-medium text-secondary">Students</div>
+          <div class="ml-2 text-sm font-medium text-secondary">{{'Students' | term}}</div>
         </div>
       </div>
       <div class="bg-primary-500 h-1"></div>
@@ -127,7 +127,7 @@
     <mat-card class="flex flex-col flex-auto shadow rounded-2xl border-none">
       <div class="p-6 pb-0">
         <div class="text-lg font-bold tracking-tight">Fee Distribution</div>
-        <div class="text-secondary text-sm">Monthly collection spread across classes</div>
+        <div class="text-secondary text-sm">Monthly collection spread across {{'classes' | term}}</div>
       </div>
       <div class="flex-auto pt-4 h-80">
         @if (isLoading) {
@@ -164,7 +164,7 @@
 
           <ng-container matColumnDef="student_name">
             <th mat-header-cell *matHeaderCellDef
-              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Billed Student </th>
+              class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Billed {{'Student' | term}} </th>
             <td mat-cell *matCellDef="let element" class="py-4">
               <div class="font-bold text-primary">{{element.invoice?.student?.name}}</div>
               <div class="text-xs text-secondary">{{element.invoice?.student?.roll_no}}</div>

@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { ApiService } from 'app/core/services/api.service';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-invoice-detail',
@@ -34,7 +35,8 @@ import { ApiService } from 'app/core/services/api.service';
         MatSidenavModule,
         CurrencyPipe,
         DatePipe,
-        RouterLink
+        RouterLink,
+        TermPipe
     ],
     templateUrl: './invoice-detail.component.html'
 })

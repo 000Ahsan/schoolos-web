@@ -14,6 +14,7 @@ import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angu
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from 'app/core/services/api.service';
 import { NgxMaskDirective } from 'ngx-mask';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 
 @Component({
     selector: 'app-discount-dialog',
@@ -115,7 +116,8 @@ export class DiscountDialogComponent {
         MatProgressSpinnerModule,
         CurrencyPipe,
         TitleCasePipe,
-        NgxMaskDirective
+        NgxMaskDirective,
+        TermPipe
     ],
     templateUrl: './student-form.component.html'
 })

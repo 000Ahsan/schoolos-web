@@ -1,5 +1,6 @@
 import { BooleanInput } from '@angular/cdk/coercion';
 import { NgClass } from '@angular/common';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -38,6 +39,7 @@ import { Subject, filter, takeUntil } from 'rxjs';
         FuseVerticalNavigationDividerItemComponent,
         FuseVerticalNavigationGroupItemComponent,
         FuseVerticalNavigationSpacerItemComponent,
+        TermPipe,
     ],
 })
 export class FuseVerticalNavigationCollapsableItemComponent

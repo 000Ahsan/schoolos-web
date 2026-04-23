@@ -5,7 +5,7 @@
             <div class="flex items-center justify-between w-full mb-8">
                 <div>
                     <div class="text-3xl font-semibold tracking-tight leading-8">Fee Vouchers</div>
-                    <div class="font-medium tracking-tight text-secondary">View and manage student fee records</div>
+                    <div class="font-medium tracking-tight text-secondary">View and manage {{'student' | term | lowercase}} fee records</div>
                 </div>
                 <div>
                     <button mat-flat-button color="primary" (click)="openDrawer()">
@@ -19,15 +19,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8 bg-card p-6 rounded-2xl shadow">
                 <form [formGroup]="filterForm" class="contents">
                     <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-                        <mat-label>Search Student / Invoice</mat-label>
+                        <mat-label>Search {{ 'Student' | term }} / Invoice</mat-label>
                         <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass" class="mr-2"></mat-icon>
                         <input matInput formControlName="search" placeholder="Search by name, roll no, invoice no">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-                        <mat-label>Class</mat-label>
+                        <mat-label>{{ 'Class' | term }}</mat-label>
                         <mat-select formControlName="class_id">
-                            <mat-option value="">All Classes</mat-option>
+                            <mat-option value="">All {{ 'Classes' | term }}</mat-option>
                             <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name + ' - ' +
                                 cls.section }}</mat-option>
                         </mat-select>
@@ -56,7 +56,7 @@
                             svgIcon="heroicons_outline:academic-cap"></mat-icon>
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-primary-600 uppercase tracking-wider">Student Ledger</div>
+                        <div class="text-sm font-medium text-primary-600 uppercase tracking-wider">{{ 'Student' | term }} Ledger</div>
                         <div class="text-2xl font-bold text-gray-900 leading-tight">Financial Summary</div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
 
                         <ng-container matColumnDef="student_name">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Student
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Student' | term}}
                             </th>
                             <td mat-cell *matCellDef="let invoice">
                                 <div class="font-bold text-primary">{{invoice.student?.name}}</div>
@@ -105,7 +105,7 @@
 
                         <ng-container matColumnDef="class">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Class
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Class' | term}}
                             </th>
                             <td mat-cell *matCellDef="let invoice"> {{invoice.student?.class?.name}} </td>
                         </ng-container>
@@ -248,13 +248,13 @@
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Target Classes</mat-label>
+                        <mat-label>Target {{ 'Classes' | term }}</mat-label>
                         <mat-select formControlName="classes" multiple required>
                             <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name + ' - ' +
                                 cls.section }}</mat-option>
                         </mat-select>
                         <mat-error *ngIf="generateForm.get('classes')?.hasError('required')">Select at least one
-                            class</mat-error>
+                            {{ 'class' | term | lowercase }}</mat-error>
                     </mat-form-field>
 
                     <div class="flex flex-col gap-2 mt-2">
@@ -270,7 +270,7 @@
                 <div class="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm">
                     <div class="font-semibold mb-1 italic">Important Note:</div>
                     This process will calculate tuition fees, and active discounts for all active students in
-                    the selected classes.
+                    the selected {{ 'classes' | term | lowercase }}.
                 </div>
             </div>
 

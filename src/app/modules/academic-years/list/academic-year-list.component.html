@@ -4,14 +4,14 @@
         <div class="flex flex-col flex-auto p-8 pt-10">
             <div class="flex items-center justify-between w-full mb-8">
                 <div>
-                    <div class="text-3xl font-semibold tracking-tight leading-8">Academic Years</div>
-                    <div class="font-medium tracking-tight text-secondary">Manage school terms and student promotions
+                    <div class="text-3xl font-semibold tracking-tight leading-8">{{ 'Academic Years' | term }}</div>
+                    <div class="font-medium tracking-tight text-secondary">Manage {{ 'Academic Years' | term | lowercase }} and {{ 'Student' | term | lowercase }} promotions
                     </div>
                 </div>
                 <div>
                     <button mat-flat-button color="primary" (click)="openDrawer('add')">
                         <mat-icon svgIcon="heroicons_outline:plus"></mat-icon>
-                        <span class="ml-2">Add Academic Year</span>
+                        <span class="ml-2">Add {{ 'Academic Year' | term }}</span>
                     </button>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                         <div class="p-6 bg-gray-100 rounded-full mb-4">
                             <mat-icon svgIcon="heroicons_outline:calendar" class="icon-size-16 text-hint"></mat-icon>
                         </div>
-                        <div class="text-2xl font-bold tracking-tight text-secondary">No academic years found</div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">No {{ 'Academic Years' | term | lowercase }} found</div>
                         <div class="mt-1 text-secondary max-w-xs">Create an academic year to manage terms, student
                             enrollments, and promotions.</div>
                     </div>
@@ -100,7 +100,7 @@
     <mat-drawer #drawer class="w-full sm:w-128 border-l dark:bg-gray-900 shadow-2xl" position="end" mode="over">
         <div class="flex flex-col h-full bg-card">
             <div class="flex items-center justify-between px-6 py-4 border-b">
-                <div class="text-lg font-medium">{{ selectedId ? 'Edit Academic Year' : 'Add Academic Year' }}</div>
+                <div class="text-lg font-medium">{{ selectedId ? ('Edit ' + ('Academic Year' | term)) : ('Add ' + ('Academic Year' | term)) }}</div>
                 <button mat-icon-button (click)="closeDrawer()">
                     <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
                 </button>

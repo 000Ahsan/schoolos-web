@@ -22,7 +22,7 @@
         <div class="fuse-vertical-navigation-item-title-wrapper">
             <div class="fuse-vertical-navigation-item-title">
                 <span [ngClass]="item.classes?.title">
-                    {{ item.title }}
+                    {{ item.title | term }}
                 </span>
             </div>
             @if (item.subtitle) {

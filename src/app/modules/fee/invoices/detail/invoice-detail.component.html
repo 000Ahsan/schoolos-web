@@ -167,11 +167,12 @@
                             </div>
 
                             <div>
-                                <div class="text-lg font-medium text-secondary italic">Student:</div>
+                                <div class="text-lg font-medium text-secondary italic">{{'Student' | term}}:</div>
                                 <div class="text-2xl font-semibold">{{ voucher.student?.name }}</div>
                                 <div class="flex flex-col text-secondary mt-1">
                                     <span>Roll No: {{ voucher.student?.roll_no }}</span>
-                                    <span>Class: {{ voucher.student?.class?.name }} {{ voucher.student?.section?.name
+                                    <span>{{'Class' | term}}: {{ voucher.student?.class?.name }} {{
+                                        voucher.student?.section?.name
                                         }}</span>
                                     <span *ngIf="voucher.student?.guardian_name">Guardian: {{
                                         voucher.student.guardian_name
@@ -292,7 +293,7 @@
                         <div class="flex justify-end mt-8">
                             <div class="w-full sm:w-1/2">
                                 <div class="flex justify-between py-2 border-b">
-                                    <span class="font-medium text-secondary">Voucher Total (Net):</span>
+                                    <span class="font-medium text-secondary">Voucher Total:</span>
                                     <span class="font-bold">{{ voucher.net_amount | currency:'PKR':'symbol':'1.0-0'
                                         }}</span>
                                 </div>
@@ -304,7 +305,7 @@
                                     <span class="font-bold text-lg">{{ (voucher.total_payable - voucher.balance) |
                                         currency:'PKR':'symbol':'1.0-0' }}</span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b">
+                                <div class="flex justify-between py-2 border-b" *ngIf="voucher.paid_amount > 0">
                                     <span class="font-medium text-secondary italic">Already Received:</span>
                                     <span class="text-green-600 font-bold">-{{ voucher.paid_amount |
                                         currency:'PKR':'symbol':'1.0-0' }}</span>
@@ -313,9 +314,6 @@
                                     class="flex justify-between py-4 mt-2 bg-gray-50 px-4 rounded-lg text-2xl font-extrabold border-2 border-gray-200">
                                     <div class="flex flex-col">
                                         <span>Total Payable:</span>
-                                        <div
-                                            class="text-xs font-medium text-secondary uppercase tracking-widest -mt-1 leading-none">
-                                            Gross Balance Due</div>
                                     </div>
                                     <span [class.text-red-600]="voucher.total_payable > 0"
                                         [class.text-green-600]="voucher.total_payable <= 0">

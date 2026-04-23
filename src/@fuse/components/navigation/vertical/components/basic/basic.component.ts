@@ -1,4 +1,5 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { TermPipe } from 'app/core/terminology/term.pipe';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -32,6 +33,7 @@ import { Subject, takeUntil } from 'rxjs';
         MatTooltipModule,
         NgTemplateOutlet,
         MatIconModule,
+        TermPipe,
     ],
 })
 export class FuseVerticalNavigationBasicItemComponent
