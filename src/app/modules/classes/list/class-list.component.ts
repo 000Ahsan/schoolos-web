@@ -130,7 +130,7 @@ export class ClassListComponent implements OnInit {
     deleteClass(cls: any) {
         const confirmation = this._fuseConfirmationService.open({
             title: 'Delete Class',
-            message: `Are you sure you want to delete ${cls.name}? All students in this class will lose their class association. This action cannot be undone!`,
+            message: `Are you sure you want to delete ${cls.name} - ${cls.section}? All students in this class will lose their class association. This action cannot be undone!`,
             actions: {
                 confirm: {
                     label: 'Delete',

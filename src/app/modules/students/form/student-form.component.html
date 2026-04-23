@@ -79,7 +79,8 @@
                         <mat-form-field appearance="outline" class="w-full">
                             <mat-label>Class</mat-label>
                             <mat-select formControlName="class_id" required>
-                                <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</mat-option>
+                                <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }} - {{ cls.section
+                                    }}</mat-option>
                             </mat-select>
                             <mat-error *ngIf="form.get('class_id')?.hasError('required')">Class is required</mat-error>
                         </mat-form-field>
@@ -113,7 +114,7 @@
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>B-Form Number</mat-label>
+                            <mat-label>B-Form Number / CNIC</mat-label>
                             <input matInput formControlName="b_form_no" mask="00000-0000000-0"
                                 placeholder="00000-0000000-0">
                         </mat-form-field>
@@ -197,10 +198,13 @@
                 </button>
             </div>
             <div class="overflow-x-auto w-full relative">
-                <table mat-table [dataSource]="discounts" class="w-full min-w-max border-separate border-spacing-0 bg-transparent">
+                <table mat-table [dataSource]="discounts"
+                    class="w-full min-w-max border-separate border-spacing-0 bg-transparent">
 
                     <ng-container matColumnDef="discount_name">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Discount Name </th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Discount Name
+                        </th>
                         <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
                             [class.text-disabled]="!element.is_active">
                             {{element.discount_name}}
@@ -208,7 +212,8 @@
                     </ng-container>
 
                     <ng-container matColumnDef="discount_type">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Type </th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Type </th>
                         <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
                             [class.text-disabled]="!element.is_active">
                             {{element.discount_type | titlecase}}
@@ -216,7 +221,8 @@
                     </ng-container>
 
                     <ng-container matColumnDef="discount_value">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Value </th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Value </th>
                         <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
                             [class.text-disabled]="!element.is_active">
                             {{element.discount_type === 'percentage' ? element.discount_value + '%' :
@@ -225,7 +231,9 @@
                     </ng-container>
 
                     <ng-container matColumnDef="applies_to">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Applies To </th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Applies To
+                        </th>
                         <td mat-cell *matCellDef="let element" [class.line-through]="!element.is_active"
                             [class.text-disabled]="!element.is_active">
                             <span *ngIf="element.applies_to === 'all'">All Fees</span>
@@ -235,7 +243,8 @@
                     </ng-container>
 
                     <ng-container matColumnDef="is_active">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Status </th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Status </th>
                         <td mat-cell *matCellDef="let element">
                             <span
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider"
@@ -246,7 +255,9 @@
                     </ng-container>
 
                     <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6"></th>
+                        <th mat-header-cell *matHeaderCellDef
+                            class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6">
+                        </th>
                         <td mat-cell *matCellDef="let element" class="text-right">
                             <button mat-icon-button *ngIf="element.is_active" (click)="deactivateDiscount(element.id)"
                                 title="Deactivate">
@@ -256,16 +267,17 @@
                     </ng-container>
 
                     <tr mat-header-row *matHeaderRowDef="discountColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: discountColumns;" class="hover:bg-gray-50 transition-colors group"></tr>
+                    <tr mat-row *matRowDef="let row; columns: discountColumns;"
+                        class="hover:bg-gray-50 transition-colors group"></tr>
                 </table>
 
-                <div *ngIf="discounts.length === 0"
-                    class="flex flex-col items-center justify-center p-12 text-center">
+                <div *ngIf="discounts.length === 0" class="flex flex-col items-center justify-center p-12 text-center">
                     <div class="p-4 bg-gray-100 rounded-full mb-3">
                         <mat-icon svgIcon="heroicons_outline:receipt-percent" class="icon-size-10 text-hint"></mat-icon>
                     </div>
                     <div class="text-xl font-bold tracking-tight text-secondary">No discounts configured</div>
-                    <div class="mt-1 text-secondary max-w-xs text-sm">Special fee concessions and scholarships will appear here.</div>
+                    <div class="mt-1 text-secondary max-w-xs text-sm">Special fee concessions and scholarships will
+                        appear here.</div>
                 </div>
             </div>
         </mat-card>

@@ -1,4 +1,5 @@
-<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden"
+    [hasBackdrop]="true">
 
     <!-- Payment Drawer -->
     <mat-drawer #drawer class="w-full sm:w-120 dark:bg-gray-900 border-l shadow-2xl" [mode]="'over'"
@@ -328,7 +329,8 @@
                             class="hover:bg-gray-50 transition-colors cursor-pointer group"></tr>
                     </table>
 
-                    <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="7"></app-table-skeleton>
+                    <app-table-skeleton *ngIf="isLoading && dataSource.data.length === 0" [rowCount]="10"
+                        [columnCount]="7"></app-table-skeleton>
 
                     <div *ngIf="!isLoading && dataSource.data.length === 0"
                         class="flex flex-col items-center justify-center p-24 text-center">

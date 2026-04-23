@@ -1,11 +1,13 @@
-<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden"
+    [hasBackdrop]="true">
     <mat-drawer-content class="flex flex-col flex-auto overflow-y-auto">
         <div class="flex flex-col flex-auto p-8 pt-10">
             <!-- Header -->
             <div class="flex items-center justify-between w-full mb-8">
                 <div>
                     <div class="text-3xl font-semibold tracking-tight leading-8">Defaulters Management</div>
-                    <div class="font-medium tracking-tight text-secondary">Monitor outstanding balances and send reminders</div>
+                    <div class="font-medium tracking-tight text-secondary">Monitor outstanding balances and send
+                        reminders</div>
                 </div>
 
                 <div>
@@ -23,13 +25,16 @@
                     <form [formGroup]="filterForm" class="flex flex-col sm:flex-row flex-auto w-full gap-4">
                         <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript flex-auto" appearance="outline">
                             <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"></mat-icon>
-                            <input matInput formControlName="search" placeholder="Search by student name or roll number">
+                            <input matInput formControlName="search"
+                                placeholder="Search by student name or roll number">
                         </mat-form-field>
 
-                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-64" appearance="outline">
+                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-full sm:w-64"
+                            appearance="outline">
                             <mat-select formControlName="class_id" placeholder="Filter by Class">
                                 <mat-option value="all">All Classes</mat-option>
-                                <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }}</mat-option>
+                                <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name + ' - ' +
+                                    cls.section }}</mat-option>
                             </mat-select>
                         </mat-form-field>
                     </form>
@@ -37,11 +42,13 @@
 
                 <!-- Table -->
                 <div class="overflow-x-auto relative">
-                    <table mat-table [dataSource]="dataSource" class="w-full min-w-max border-separate border-spacing-0">
+                    <table mat-table [dataSource]="dataSource"
+                        class="w-full min-w-max border-separate border-spacing-0">
 
                         <!-- Checkbox Column -->
                         <ng-container matColumnDef="select">
-                            <th mat-header-cell *matHeaderCellDef class="w-12 bg-gray-50 uppercase text-xs font-bold tracking-wider">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="w-12 bg-gray-50 uppercase text-xs font-bold tracking-wider">
                                 <mat-checkbox (change)="$event ? masterToggle() : null"
                                     [checked]="selection.hasValue() && isAllSelected()"
                                     [indeterminate]="selection.hasValue() && !isAllSelected()" color="primary">
@@ -49,14 +56,16 @@
                             </th>
                             <td mat-cell *matCellDef="let row">
                                 <mat-checkbox (click)="$event.stopPropagation()"
-                                    (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
-                                    color="primary">
+                                    (change)="$event ? selection.toggle(row) : null"
+                                    [checked]="selection.isSelected(row)" color="primary">
                                 </mat-checkbox>
                             </td>
                         </ng-container>
 
                         <ng-container matColumnDef="student_name">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Student </th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Student
+                            </th>
                             <td mat-cell *matCellDef="let element">
                                 <div class="font-bold text-primary">{{element.name}}</div>
                                 <div class="text-xs text-secondary">{{element.roll_no}}</div>
@@ -64,60 +73,81 @@
                         </ng-container>
 
                         <ng-container matColumnDef="class_name">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Class </th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Class
+                            </th>
                             <td mat-cell *matCellDef="let element"> {{element.class_name}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="guardian_phone">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Phone No </th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Phone No
+                            </th>
                             <td mat-cell *matCellDef="let element"> {{element.guardian_phone}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="unpaid_count">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Vouchers Due </th>
-                            <td mat-cell *matCellDef="let element"> 
-                                <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold text-xs border border-orange-200">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Vouchers
+                                Due </th>
+                            <td mat-cell *matCellDef="let element">
+                                <span
+                                    class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold text-xs border border-orange-200">
                                     {{element.unpaid_count}} Pending
                                 </span>
                             </td>
                         </ng-container>
 
                         <ng-container matColumnDef="total_due">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Total Arrears </th>
-                            <td mat-cell *matCellDef="let element" class="text-red-600 font-bold"> 
-                                {{element.total_due | currency:'PKR':'symbol':'1.0-0'}} 
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Total
+                                Arrears </th>
+                            <td mat-cell *matCellDef="let element" class="text-red-600 font-bold">
+                                {{element.total_due | currency:'PKR':'symbol':'1.0-0'}}
                             </td>
                         </ng-container>
 
                         <ng-container matColumnDef="actions">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6"></th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6">
+                            </th>
                             <td mat-cell *matCellDef="let element" class="text-right pr-6 whitespace-nowrap">
-                                <button mat-icon-button (click)="$event.stopPropagation(); sendSingleReminder(element)" matTooltip="Send Reminder">
-                                    <mat-icon svgIcon="heroicons_outline:paper-airplane" class="text-primary icon-size-5"></mat-icon>
+                                <button mat-icon-button (click)="$event.stopPropagation(); sendSingleReminder(element)"
+                                    matTooltip="Send Reminder">
+                                    <mat-icon svgIcon="heroicons_outline:paper-airplane"
+                                        class="text-primary icon-size-5"></mat-icon>
                                 </button>
-                                <button mat-icon-button (click)="$event.stopPropagation(); openDetails(element)" matTooltip="View Detail">
+                                <button mat-icon-button (click)="$event.stopPropagation(); openDetails(element)"
+                                    matTooltip="View Detail">
                                     <mat-icon svgIcon="heroicons_outline:eye" class="icon-size-5"></mat-icon>
                                 </button>
                             </td>
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors group cursor-pointer" (click)="openDetails(row)"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                            class="hover:bg-gray-50 transition-colors group cursor-pointer" (click)="openDetails(row)">
+                        </tr>
                     </table>
 
-                        <app-table-skeleton *ngIf="isLoading" [rowCount]="10" [columnCount]="7"></app-table-skeleton>
+                    <app-table-skeleton *ngIf="isLoading && dataSource.data.length === 0" [rowCount]="10"
+                        [columnCount]="7"></app-table-skeleton>
                     <div *ngIf="!isLoading && dataSource.data.length === 0"
                         class="flex flex-col items-center justify-center p-24 text-center">
                         <div class="p-6 bg-green-50 rounded-full mb-4">
-                            <mat-icon svgIcon="heroicons_outline:check-badge" class="icon-size-16 text-green-500"></mat-icon>
+                            <mat-icon svgIcon="heroicons_outline:check-badge"
+                                class="icon-size-16 text-green-500"></mat-icon>
                         </div>
-                        <div class="text-2xl font-bold tracking-tight text-secondary">Great job! No defaulters found.</div>
-                        <div class="mt-1 text-secondary max-w-xs">All students have cleared their dues or no records match your current filters.</div>
+                        <div class="text-2xl font-bold tracking-tight text-secondary">Great job! No defaulters found.
+                        </div>
+                        <div class="mt-1 text-secondary max-w-xs">All students have cleared their dues or no records
+                            match your current filters.</div>
                     </div>
                 </div>
 
                 <mat-paginator [length]="totalRecords" [pageSize]="pageSize" [pageIndex]="pageIndex"
-                    [pageSizeOptions]="[10, 25, 50, 100]" (page)="onPageChange($event)" class="border-t"></mat-paginator>
+                    [pageSizeOptions]="[10, 25, 50, 100]" (page)="onPageChange($event)"
+                    class="border-t"></mat-paginator>
             </div>
         </div>
     </mat-drawer-content>
@@ -142,9 +172,11 @@
                 </div>
 
                 <div *ngIf="!isLoadingDetails" class="space-y-4">
-                    <div *ngFor="let invoice of studentInvoices" class="flex flex-col p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-primary transition-colors">
+                    <div *ngFor="let invoice of studentInvoices"
+                        class="flex flex-col p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-primary transition-colors">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-bold text-secondary uppercase tracking-wider">Voucher: {{ invoice.invoice_no }}</span>
+                            <span class="text-sm font-bold text-secondary uppercase tracking-wider">Voucher: {{
+                                invoice.invoice_no }}</span>
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                                 [ngClass]="{
                                     'bg-yellow-100 text-yellow-800': invoice.status === 'pending',
@@ -156,8 +188,10 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
-                                <div class="text-xl font-extrabold text-primary">{{ invoice.net_amount | currency:'PKR':'symbol':'1.0-0' }}</div>
-                                <div class="text-xs text-secondary italic">Billing: {{ invoice.month }}/{{ invoice.year }}</div>
+                                <div class="text-xl font-extrabold text-primary">{{ invoice.net_amount |
+                                    currency:'PKR':'symbol':'1.0-0' }}</div>
+                                <div class="text-xs text-secondary italic">Billing: {{ invoice.month }}/{{ invoice.year
+                                    }}</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xs font-bold text-gray-500">Due Date</div>
@@ -166,8 +200,10 @@
                         </div>
                     </div>
 
-                    <div *ngIf="studentInvoices.length === 0" class="p-12 text-center text-secondary bg-gray-50 rounded-xl border border-dashed">
-                        <mat-icon svgIcon="heroicons_outline:clipboard-document-check" class="icon-size-12 text-hint mb-2"></mat-icon>
+                    <div *ngIf="studentInvoices.length === 0"
+                        class="p-12 text-center text-secondary bg-gray-50 rounded-xl border border-dashed">
+                        <mat-icon svgIcon="heroicons_outline:clipboard-document-check"
+                            class="icon-size-12 text-hint mb-2"></mat-icon>
                         <p class="font-medium italic">No pending invoices for this student.</p>
                     </div>
                 </div>
@@ -176,13 +212,15 @@
             <div class="flex items-center justify-between px-6 py-4 border-t bg-gray-50">
                 <div class="flex flex-col">
                     <span class="text-xs text-secondary uppercase font-bold">Total Arrears</span>
-                    <span class="text-xl font-bold text-red-600 truncate">{{ selectedStudent?.total_due | currency:'PKR':'symbol':'1.0-0' }}</span>
+                    <span class="text-xl font-bold text-red-600 truncate">{{ selectedStudent?.total_due |
+                        currency:'PKR':'symbol':'1.0-0' }}</span>
                 </div>
-                <button mat-flat-button color="primary" class="shadow-md h-12 px-6 rounded-xl" (click)="sendSingleReminder(selectedStudent)">
+                <button mat-flat-button color="primary" class="shadow-md h-12 px-6 rounded-xl"
+                    (click)="sendSingleReminder(selectedStudent)">
                     <mat-icon svgIcon="heroicons_outline:paper-airplane"></mat-icon>
                     <span class="ml-2 font-bold">Send Reminder</span>
                 </button>
             </div>
         </div>
     </mat-drawer>
-</mat-drawer-container>
+</mat-drawer-container>

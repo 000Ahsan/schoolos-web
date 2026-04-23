@@ -1,4 +1,5 @@
-<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden"
+    [hasBackdrop]="true">
 
     <mat-drawer-content class="flex flex-col flex-auto overflow-y-auto">
         <div class="flex flex-col flex-auto p-8 pt-10">
@@ -23,39 +24,53 @@
                         matSortDirection="asc" class="w-full border-separate border-spacing-0">
 
                         <ng-container matColumnDef="name">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Name </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Name </th>
                             <td mat-cell *matCellDef="let cls" class="font-bold text-primary"> {{cls.name}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="section">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Section </th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Section
+                            </th>
                             <td mat-cell *matCellDef="let cls"> {{cls.section || '-'}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="students_count">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Students </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Students
+                            </th>
                             <td mat-cell *matCellDef="let cls">
                                 <div class="flex items-center">
                                     <span class="font-medium mr-2">{{cls.students_count || 0}}</span>
-                                    <button mat-icon-button class="w-8 h-8 min-h-8" (click)="$event.stopPropagation(); viewStudents(cls)" matTooltip="View Students">
-                                        <mat-icon class="icon-size-4 text-hint" svgIcon="heroicons_outline:users"></mat-icon>
+                                    <button mat-icon-button class="w-8 h-8 min-h-8"
+                                        (click)="$event.stopPropagation(); viewStudents(cls)"
+                                        matTooltip="View Students">
+                                        <mat-icon class="icon-size-4 text-hint"
+                                            svgIcon="heroicons_outline:users"></mat-icon>
                                     </button>
                                 </div>
                             </td>
                         </ng-container>
 
                         <ng-container matColumnDef="numeric_order">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Order </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Order
+                            </th>
                             <td mat-cell *matCellDef="let cls"> {{cls.numeric_order}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="capacity">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Capacity </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Capacity
+                            </th>
                             <td mat-cell *matCellDef="let cls"> {{cls.capacity}} </td>
                         </ng-container>
 
                         <ng-container matColumnDef="is_active">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Status </th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> Status
+                            </th>
                             <td mat-cell *matCellDef="let cls">
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider"
@@ -66,12 +81,15 @@
                         </ng-container>
 
                         <ng-container matColumnDef="actions">
-                            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6"></th>
+                            <th mat-header-cell *matHeaderCellDef
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider text-right pr-6">
+                            </th>
                             <td mat-cell *matCellDef="let cls" class="text-right">
                                 <button mat-icon-button (click)="$event.stopPropagation(); openDrawer('edit', cls)">
                                     <mat-icon svgIcon="heroicons_outline:pencil"></mat-icon>
                                 </button>
-                                <button mat-icon-button color="warn" (click)="$event.stopPropagation(); deleteClass(cls)">
+                                <button mat-icon-button color="warn"
+                                    (click)="$event.stopPropagation(); deleteClass(cls)">
                                     <mat-icon svgIcon="heroicons_outline:trash"></mat-icon>
                                 </button>
                             </td>
@@ -79,18 +97,22 @@
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                            class="hover:bg-gray-50 transition-colors group cursor-pointer h-16" (click)="openDrawer('edit', row)"></tr>
+                            class="hover:bg-gray-50 transition-colors group cursor-pointer h-16"
+                            (click)="openDrawer('edit', row)"></tr>
                     </table>
 
-                    <app-table-skeleton *ngIf="isLoading" [columnCount]="7" [rowCount]="5"></app-table-skeleton>
+                    <app-table-skeleton *ngIf="isLoading && dataSource.data.length === 0" [columnCount]="7"
+                        [rowCount]="5"></app-table-skeleton>
 
                     <div *ngIf="!isLoading && dataSource.data.length === 0"
                         class="flex flex-col items-center justify-center p-24 text-center">
                         <div class="p-6 bg-gray-100 rounded-full mb-4">
-                            <mat-icon svgIcon="heroicons_outline:academic-cap" class="icon-size-16 text-hint"></mat-icon>
+                            <mat-icon svgIcon="heroicons_outline:academic-cap"
+                                class="icon-size-16 text-hint"></mat-icon>
                         </div>
                         <div class="text-2xl font-bold tracking-tight text-secondary">No classes found</div>
-                        <div class="mt-1 text-secondary max-w-xs">Start by adding your first class to organize your students and academic structure.</div>
+                        <div class="mt-1 text-secondary max-w-xs">Start by adding your first class to organize your
+                            students and academic structure.</div>
                     </div>
                 </div>
             </div>

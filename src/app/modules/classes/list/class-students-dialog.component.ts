@@ -86,7 +86,7 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="h-12 hover:bg-gray-50 transition-colors"></tr>
                 </table>
 
-                <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="3"></app-table-skeleton>
+                <app-table-skeleton *ngIf="isLoading && students.length === 0" [rowCount]="5" [columnCount]="3"></app-table-skeleton>
 
                 <div *ngIf="!isLoading && students.length === 0"
                     class="flex flex-col items-center justify-center p-16 text-center">
@@ -182,7 +182,7 @@ export class ClassStudentsDialogComponent implements OnInit {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `Students_${this.data.class.name}_${this.data.class.section}.csv`);
         link.style.visibility = 'hidden';

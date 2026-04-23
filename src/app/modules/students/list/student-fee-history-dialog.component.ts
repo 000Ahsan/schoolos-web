@@ -109,7 +109,7 @@ import { TableSkeletonComponent } from 'app/shared/components/table-skeleton/tab
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="h-12 hover:bg-gray-50 transition-colors"></tr>
                 </table>
 
-                <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="6"></app-table-skeleton>
+                <app-table-skeleton *ngIf="isLoading && invoices.length === 0" [rowCount]="5" [columnCount]="6"></app-table-skeleton>
 
                 <div *ngIf="!isLoading && invoices.length === 0"
                     class="flex flex-col items-center justify-center p-16 text-center">

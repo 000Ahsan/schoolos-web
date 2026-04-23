@@ -1,4 +1,5 @@
-<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden" [hasBackdrop]="true">
+<mat-drawer-container class="absolute inset-0 flex-auto min-h-0 w-full bg-transparent overflow-hidden"
+    [hasBackdrop]="true">
     <mat-drawer-content class="flex flex-col flex-auto min-w-0">
         <div class="flex flex-col flex-auto p-8 pt-10">
             <div class="flex items-center justify-between w-full mb-8">
@@ -63,7 +64,7 @@
                                 <div class="flex flex-wrap items-center gap-1 max-w-sm">
                                     <span *ngFor="let cls of row.classes | slice:0:3"
                                         class="px-2 py-0.5 bg-gray-50 rounded text-[10px] text-primary font-medium border border-blue-100">
-                                        {{cls.name}}
+                                        {{cls.name + " - " + cls.section}}
                                     </span>
                                     <span *ngIf="row.classes?.length > 3" [matTooltip]="getClassTooltip(row.classes)"
                                         class="px-2 py-0.5 bg-primary text-white rounded text-[10px] font-bold cursor-help shadow-sm">
@@ -94,7 +95,8 @@
                             (click)="openDrawer('edit', row)"></tr>
                     </table>
 
-                    <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="6"></app-table-skeleton>
+                    <app-table-skeleton *ngIf="isLoading && dataSource.data.length === 0" [rowCount]="5"
+                        [columnCount]="6"></app-table-skeleton>
 
                     <div *ngIf="!isLoading && dataSource.data.length === 0"
                         class="flex flex-col items-center justify-center p-24 text-center">
@@ -103,7 +105,8 @@
                                 class="icon-size-16 text-hint"></mat-icon>
                         </div>
                         <div class="text-2xl font-bold tracking-tight text-secondary">No fee structures found</div>
-                        <div class="mt-1 text-secondary max-w-xs">Define your first fee structure to start managing student billing.</div>
+                        <div class="mt-1 text-secondary max-w-xs">Define your first fee structure to start managing
+                            student billing.</div>
                     </div>
                 </div>
             </div>
@@ -137,7 +140,9 @@
                     <mat-form-field appearance="outline" class="w-full">
                         <mat-label>Target Classes</mat-label>
                         <mat-select formControlName="classes" multiple required>
-                            <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name }}</mat-option>
+                            <mat-option *ngFor="let cls of classesList" [value]="cls.id">{{ cls.name + ' - ' +
+                                cls.section
+                                }}</mat-option>
                         </mat-select>
                         <mat-error *ngIf="form.get('classes')?.hasError('required')">At least one class is
                             required</mat-error>

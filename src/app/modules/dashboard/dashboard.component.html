@@ -205,16 +205,18 @@
         </table>
 
         <div *ngIf="recentPayments.length === 0 && !isLoading"
-            class="flex flex-col items-center justify-center p-16 text-center">
-            <div class="p-6 bg-gray-100 rounded-full mb-4">
-                <mat-icon svgIcon="heroicons_outline:circle-stack" class="icon-size-16 text-hint"></mat-icon>
-            </div>
-            <div class="text-2xl font-bold tracking-tight text-secondary">No live transactions found</div>
-            <div class="mt-1 text-secondary max-w-xs">Recent payments will appear here as soon as they are recorded in the system.</div>
+          class="flex flex-col items-center justify-center p-16 text-center">
+          <div class="p-6 bg-gray-100 rounded-full mb-4">
+            <mat-icon svgIcon="heroicons_outline:circle-stack" class="icon-size-16 text-hint"></mat-icon>
+          </div>
+          <div class="text-2xl font-bold tracking-tight text-secondary">No live transactions found</div>
+          <div class="mt-1 text-secondary max-w-xs">Recent payments will appear here as soon as they are recorded in the
+            system.</div>
         </div>
 
         <!-- SKELETON FOR TABLE -->
-        <app-table-skeleton *ngIf="isLoading" [rowCount]="5" [columnCount]="5" class="bg-transparent"></app-table-skeleton>
+        <app-table-skeleton *ngIf="isLoading && recentPayments.length === 0" [rowCount]="5" [columnCount]="5"
+          class="bg-transparent"></app-table-skeleton>
       </div>
     </mat-card>
   </div>
