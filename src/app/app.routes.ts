@@ -87,6 +87,8 @@ export const appRoutes: Route[] = [
             { path: 'classes', loadChildren: () => import('./modules/classes/classes.routes') },
             // Fee
             { path: 'fee', loadChildren: () => import('./modules/fee/fee.routes') },
+            // AI Reports
+            { path: 'ai-reports', loadChildren: () => import('./modules/ai-reports/ai-reports.routes') },
             // WhatsApp
             { path: 'whatsapp', loadChildren: () => import('./modules/whatsapp/whatsapp.routes') },
             // Academic Years

@@ -21,7 +21,8 @@
             <div class="flex-auto overflow-y-auto min-h-0 p-8 space-y-8 bg-white">
                 <!-- Step 1: Search Student -->
                 <div class="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
-                    <div class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-700">1. Identify {{ 'Student' | term }}</div>
+                    <div class="text-sm font-bold uppercase tracking-wider mb-4 text-gray-700">1. Identify {{ 'Student'
+                        | term }}</div>
                     <mat-form-field class="w-full" appearance="outline" [subscriptSizing]="'dynamic'">
                         <mat-icon matPrefix svgIcon="heroicons_outline:magnifying-glass"
                             class="icon-size-5 mr-3 text-secondary"></mat-icon>
@@ -131,8 +132,6 @@
                 <button mat-flat-button class="w-full h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/20"
                     color="primary" [disabled]="paymentForm.invalid || isSaving" (click)="recordPayment()">
                     <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle" class="mr-2"></mat-icon>
-                    <mat-progress-spinner *ngIf="isSaving" [diameter]="24" [mode]="'indeterminate'"
-                        class="mr-2"></mat-progress-spinner>
                     {{ isSaving ? 'Processing...' : 'Confirm Payment' }}
                 </button>
             </div>
@@ -236,7 +235,8 @@
 
                         <ng-container matColumnDef="student">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary"> {{'Student' | term}}
+                                class="bg-gray-50 uppercase text-xs font-bold tracking-wider text-secondary">
+                                {{'Student' | term}}
                                 Info </th>
                             <td mat-cell *matCellDef="let element">
                                 <div class="flex flex-col py-3">

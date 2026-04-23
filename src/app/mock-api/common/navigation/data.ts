@@ -67,6 +67,13 @@ const _navigationBase: FuseNavigationItem[] = [
         ],
     },
     {
+        id: 'ai-reports',
+        title: 'AI Reports',
+        type: 'basic',
+        icon: 'heroicons_solid:cpu-chip',
+        link: '/ai-reports',
+    },
+    {
         id: 'whatsapp-logs',
         title: 'WhatsApp Logs',
         type: 'basic',
