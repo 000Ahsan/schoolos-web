@@ -72,7 +72,7 @@ export class InvoiceListComponent implements OnInit {
     constructor() {
         this.generateForm = this._fb.group({
             billing_month: [new Date().toISOString().substring(0, 7), Validators.required],
-            due_date: [{ value: '', disabled: true }, Validators.required],
+            due_date: [{ value: '', disabled: true }],
             classes: [[], Validators.required],
             include_admission: [false],
             include_annual: [false]
@@ -116,6 +116,11 @@ export class InvoiceListComponent implements OnInit {
     private _calculateDueDate() {
         const billingMonth = this.generateForm.get('billing_month').value;
         if (!billingMonth || !this.schoolSettings) return;
+
+        if (this.schoolSettings.fee_calculation_mode === 'admission_anniversary') {
+            this.generateForm.get('due_date').setValue(null);
+            return;
+        }
 
         const [year, month] = billingMonth.split('-').map(Number);
         const day = this.schoolSettings.fee_due_day || 10;

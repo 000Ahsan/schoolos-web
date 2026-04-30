@@ -56,6 +56,7 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
             email: ['', [Validators.email]],
             currency: ['PKR'],
             fee_due_day: [10, [Validators.min(1), Validators.max(31)]],
+            fee_calculation_mode: ['fixed_month'],
             late_fine_per_month: [0],
             logo: [null]
         });
@@ -68,6 +69,11 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
                     this.form.patchValue(settings);
                     // Capture original org type to detect changes on save
                     this._originalOrgType = settings.organization_type ?? 'school';
+                    
+                    if (settings.has_invoices) {
+                        this.form.get('fee_calculation_mode')?.disable();
+                    }
+
                     if (settings.logo_url) {
                         this.logoPreview = settings.logo_url;
                     }

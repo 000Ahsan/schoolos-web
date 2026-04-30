@@ -5,7 +5,8 @@
             <div class="flex items-center justify-between w-full mb-8">
                 <div>
                     <div class="text-3xl font-semibold tracking-tight leading-8">Fee Vouchers</div>
-                    <div class="font-medium tracking-tight text-secondary">View and manage {{'student' | term | lowercase}} fee records</div>
+                    <div class="font-medium tracking-tight text-secondary">View and manage {{'student' | term |
+                        lowercase}} fee records</div>
                 </div>
                 <div>
                     <button mat-flat-button color="primary" (click)="openDrawer()">
@@ -56,7 +57,8 @@
                             svgIcon="heroicons_outline:academic-cap"></mat-icon>
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-primary-600 uppercase tracking-wider">{{ 'Student' | term }} Ledger</div>
+                        <div class="text-sm font-medium text-primary-600 uppercase tracking-wider">{{ 'Student' | term
+                            }} Ledger</div>
                         <div class="text-2xl font-bold text-gray-900 leading-tight">Financial Summary</div>
                     </div>
                 </div>
@@ -87,7 +89,8 @@
 
                         <ng-container matColumnDef="student_name">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Student' | term}}
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider">
+                                {{'Student' | term}}
                             </th>
                             <td mat-cell *matCellDef="let invoice">
                                 <div class="font-bold text-primary">{{invoice.student?.name}}</div>
@@ -105,7 +108,8 @@
 
                         <ng-container matColumnDef="class">
                             <th mat-header-cell *matHeaderCellDef
-                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Class' | term}}
+                                class="bg-gray-50 text-secondary uppercase text-xs font-bold tracking-wider"> {{'Class'
+                                | term}}
                             </th>
                             <td mat-cell *matCellDef="let invoice"> {{invoice.student?.class?.name}} </td>
                         </ng-container>
@@ -240,12 +244,14 @@
                             required</mat-error>
                     </mat-form-field>
 
+                    @if(schoolSettings?.fee_calculation_mode !== 'admission_anniversary') {
                     <mat-form-field appearance="outline" class="w-full">
                         <mat-label>Due Date</mat-label>
                         <input matInput [matDatepicker]="duePicker" formControlName="due_date" readonly>
-                        <mat-datepicker-toggle matIconSuffix [for]="duePicker" disabled></mat-datepicker-toggle>
+                        <mat-datepicker-toggle matIconSuffix [for]="duePicker"></mat-datepicker-toggle>
                         <mat-datepicker #duePicker></mat-datepicker>
                     </mat-form-field>
+                    }
 
                     <mat-form-field appearance="outline" class="w-full">
                         <mat-label>Target {{ 'Classes' | term }}</mat-label>
@@ -259,15 +265,25 @@
 
                     <div class="flex flex-col gap-2 mt-2">
                         <mat-checkbox formControlName="include_admission" color="primary">
-                            Include Admission Fee (First-time students only)
+                            <div class="font-semibold">Include Admission Fee</div>
+                            <div class="text-sm text-gray-500">First-time students only</div>
                         </mat-checkbox>
                         <mat-checkbox formControlName="include_annual" color="primary">
-                            Include Annual Fund (Once per academic year)
+                            <div class="font-semibold">Include Annual Fund</div>
+                            <div class="text-sm text-gray-500">Once per academic year</div>
                         </mat-checkbox>
                     </div>
                 </form>
 
-                <div class="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm">
+                @if(schoolSettings?.fee_calculation_mode === 'admission_anniversary') {
+                <div class="mt-8 p-4 bg-yellow-50 border border-yellow-100 rounded-lg text-yellow-800 text-sm">
+                    <div class="font-semibold mb-1 italic">Important Note:</div>
+                    Voucher due date will be calculated as per studdent admission
+                    date because your school setting has fee calculation mode set to "Admission Anniversary".
+                </div>
+                }
+
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-50 rounded-lg text-blue-800 text-sm">
                     <div class="font-semibold mb-1 italic">Important Note:</div>
                     This process will calculate tuition fees, and active discounts for all active students in
                     the selected {{ 'classes' | term | lowercase }}.

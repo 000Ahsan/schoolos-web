@@ -86,7 +86,7 @@
 
                 <div class="mt-8 pt-8 border-t">
                     <div class="text-xl font-bold mb-6">Financial & System Preferences</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
                         <mat-form-field appearance="outline">
                             <mat-label>Currency</mat-label>
                             <input matInput formControlName="currency">
@@ -100,6 +100,18 @@
                         <mat-form-field appearance="outline">
                             <mat-label>Late Fee Fine</mat-label>
                             <input matInput type="number" formControlName="late_fine_per_month">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="sm:col-span-2 md:col-span-1">
+                            <mat-label>Fee Cycle Type</mat-label>
+                            <mat-select formControlName="fee_calculation_mode">
+                                <mat-option value="fixed_month">📅 Fixed Monthly (1st-30th)</mat-option>
+                                <mat-option value="admission_anniversary">🎂 Admission Anniversary</mat-option>
+                            </mat-select>
+                            <mat-hint *ngIf="form.get('fee_calculation_mode').disabled"
+                                class="text-orange-500 font-medium">
+                                You cannot change this setting because you have already generated fee vouchers.
+                            </mat-hint>
                         </mat-form-field>
 
                     </div>
@@ -162,9 +174,9 @@
                                 Devices.
                             </div>
                             } @else if (whatsappStatus === 'connected' || whatsappStatus === 'authenticated') {
-                            <mat-icon class="icon-size-24 text-green-500 mb-4"
+                            <mat-icon class="icon-size-24 text-primary mb-4"
                                 [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
-                            <div class="text-lg font-semibold text-green-600">Successfully Connected</div>
+                            <div class="text-lg font-semibold text-primary">Successfully Connected</div>
                             <div class="text-sm text-secondary mt-1">Your WhatsApp device is ready to send messages.
                             </div>
                             } @else if (whatsappStatus === 'initializing') {
