@@ -17,6 +17,9 @@ export class ApiService {
     }
     updateStudent(id: number, data: any): Observable<any> { return this._http.put<any>(`${this._apiUrl}/students/${id}`, data); }
     deleteStudent(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/students/${id}`); }
+    resetStudentPassword(id: number): Observable<any> { return this._http.post<any>(`${this._apiUrl}/students/${id}/reset-password`, {}); }
+    changeAdminPassword(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/auth/change-password`, data); }
+    changeStudentPassword(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/student/auth/change-password`, data); }
 
     // Classes
     getClasses(): Observable<any[]> { return this._http.get<any[]>(`${this._apiUrl}/classes`); }
@@ -53,6 +56,7 @@ export class ApiService {
     getInvoices(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices`, { params }); }
     generateInvoices(data: any): Observable<any> { return this._http.post<any>(`${this._apiUrl}/fee/invoices/generate`, data); }
     getInvoice(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/invoices/${id}`); }
+    getVoucherPdf(id: number): Observable<Blob> { return this._http.get(`${this._apiUrl}/fee/invoices/${id}/download`, { responseType: 'blob' }); }
     deleteInvoice(id: number): Observable<any> { return this._http.delete<any>(`${this._apiUrl}/fee/invoices/${id}`); }
     getDefaulters(params: any = {}): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters`, { params }); }
     getDefaulterSummary(id: number): Observable<any> { return this._http.get<any>(`${this._apiUrl}/fee/defaulters/${id}`); }

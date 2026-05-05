@@ -1,0 +1,106 @@
+<div class="flex flex-col sm:flex-row items-center md:items-start sm:justify-center md:justify-start flex-auto min-w-0">
+    <div
+        class="md:flex md:items-center md:justify-end w-full sm:w-auto md:h-full md:w-1/2 py-8 px-4 sm:p-12 md:p-16 sm:rounded-2xl md:rounded-none bg-card">
+        <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
+            <!-- Logo -->
+            <div class="w-12">
+                <img src="images/logo/logo.svg" />
+            </div>
+
+            <!-- Title -->
+            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Student Portal</div>
+            <div class="flex items-baseline mt-0.5 font-medium">
+                <div>Sign in to access your dashboard</div>
+            </div>
+
+            <!-- Alert -->
+            @if (showAlert) {
+            <fuse-alert class="mt-8" [appearance]="'fill'" [showIcon]="false" [type]="alert.type" [@zoomIn]="showAlert">
+                {{alert.message}}
+            </fuse-alert>
+            }
+
+            <!-- Sign in form -->
+            <form class="mt-8" [formGroup]="loginForm" #signInNgForm="ngForm">
+
+                <!-- Username field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Username</mat-label>
+                    <input id="username" matInput [formControlName]="'username'">
+                    @if (loginForm.get('username').hasError('required')) {
+                    <mat-error>Username is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Password</mat-label>
+                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField>
+                    <button mat-icon-button type="button"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                        matSuffix>
+                        @if (passwordField.type === 'password') {
+                        <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                        }
+                        @if (passwordField.type === 'text') {
+                        <mat-icon [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                        }
+                    </button>
+                    @if (loginForm.get('password').hasError('required')) {
+                    <mat-error>Password is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Submit button -->
+                <button class="fuse-mat-button-large w-full mt-6" mat-flat-button [color]="'primary'"
+                    [disabled]="loginForm.disabled" (click)="signIn()">
+                    @if (!loginForm.disabled) {
+                    <span>Sign in</span>
+                    }
+                    @if (loginForm.disabled) {
+                    <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <div
+        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-primary p-16 dark:border-l md:flex lg:px-28">
+        <!-- Background -->
+        <!-- Rings -->
+        <!-- prettier-ignore -->
+        <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width="100%" height="100%"
+            preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- Dots -->
+        <!-- prettier-ignore -->
+        <svg class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192"
+            fill="none">
+            <defs>
+                <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20"
+                    patternUnits="userSpaceOnUse">
+                    <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
+                </pattern>
+            </defs>
+            <rect width="220" height="192" fill="url(#837c3e70-6c3a-44e6-8854-cc48c737b659)"></rect>
+        </svg>
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-2xl">
+            <div class="text-7xl font-bold leading-none text-gray-100">
+                <div>Welcome to</div>
+                <div>SchoolOS</div>
+            </div>
+            <div class="mt-6 text-lg leading-6 tracking-tight text-gray-100">
+                SchoolOS is a comprehensive school management system that helps you manage your school
+                efficiently. With SchoolOS, you can manage students, teachers, classes, attendance, fees, and
+                much more.
+            </div>
+        </div>
+    </div>
+</div>

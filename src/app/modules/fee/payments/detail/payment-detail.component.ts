@@ -60,7 +60,31 @@ export class PaymentDetailComponent implements OnInit {
         });
     }
 
-    printReceipt() {
-        window.print();
+    downloadReceipt() {
+        if (!this.payment) return;
+        
+        this._apiService.getReceipt(this.payment.id).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Construct filename: [Student Name]-[Roll Number]-Receipt-[Receipt No]-[Timestamp].pdf
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '').split('T').join('').split('Z')[0];
+                const studentName = this.payment.student?.name || 'Student';
+                const rollNo = this.payment.student?.roll_no || '000';
+                
+                const filename = `${studentName}-${rollNo}-Receipt-${this.payment.receipt_no}-${timestamp}.pdf`.replace(/ /g, '_');
+                
+                link.download = filename;
+                link.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: () => {
+                this._snackBar.open('Error downloading receipt', 'Close', { duration: 3000 });
+            }
+        });
     }
 }
+
+

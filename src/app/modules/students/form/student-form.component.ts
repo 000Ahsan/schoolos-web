@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from 'app/core/services/api.service';
 import { NgxMaskDirective } from 'ngx-mask';
 import { TermPipe } from 'app/core/terminology/term.pipe';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
     selector: 'app-discount-dialog',
@@ -98,6 +99,37 @@ export class DiscountDialogComponent {
 }
 
 @Component({
+    selector: 'app-student-credentials-dialog',
+    standalone: true,
+    imports: [CommonModule, MatButtonModule, MatDialogModule, MatIconModule],
+    template: `
+    <mat-dialog-content>
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4">
+            <p class="text-amber-700 text-sm">
+                Please copy these credentials. The password will not be shown again.
+            </p>
+        </div>
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-col">
+                <span class="text-xs text-secondary font-medium">USERNAME</span>
+                <span class="text-lg font-mono bg-gray-100 p-2 rounded">{{data.username}}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-xs text-secondary font-medium">PASSWORD</span>
+                <span class="text-lg font-mono bg-gray-100 p-2 rounded">{{data.password}}</span>
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-flat-button color="primary" [mat-dialog-close]="true">I've Saved Them</button>
+    </mat-dialog-actions>
+    `
+})
+export class StudentCredentialsDialogComponent {
+    constructor(@Inject(MAT_DIALOG_DATA) public data: { username: string, password: string }) { }
+}
+
+@Component({
     selector: 'app-student-form',
     standalone: true,
     imports: [
@@ -117,7 +149,8 @@ export class DiscountDialogComponent {
         CurrencyPipe,
         TitleCasePipe,
         NgxMaskDirective,
-        TermPipe
+        TermPipe,
+        MatCheckboxModule
     ],
     templateUrl: './student-form.component.html'
 })
@@ -156,7 +189,9 @@ export class StudentFormComponent implements OnInit {
             guardian_cnic: [''],
             emergency_contact: ['', [Validators.pattern('^\\+92[0-9]{10}$')]],
             address: [''],
-            photo_path: [null]
+            photo_path: [null],
+            username: [{ value: '', disabled: true }],
+            is_portal_enabled: [true]
         });
     }
 
@@ -210,7 +245,7 @@ export class StudentFormComponent implements OnInit {
             return;
         }
 
-        const formValue = { ...this.form.value };
+        const formValue = this.form.getRawValue();
 
         // Format dates
         const formatDate = (date: any) => {
@@ -245,9 +280,23 @@ export class StudentFormComponent implements OnInit {
             : this._apiService.createStudent(formData);
 
         req.subscribe({
-            next: () => {
+            next: (student: any) => {
+                this.isLoading = false;
                 this._snackBar.open(`Student ${this.studentId ? 'updated' : 'created'} successfully`, 'Close', { duration: 3000 });
-                this._router.navigate(['/students']);
+
+                if (!this.studentId && student.generated_password) {
+                    this._dialog.open(StudentCredentialsDialogComponent, {
+                        data: {
+                            username: student.username,
+                            password: student.generated_password
+                        },
+                        disableClose: true
+                    }).afterClosed().subscribe(() => {
+                        this._router.navigate(['/students']);
+                    });
+                } else {
+                    this._router.navigate(['/students']);
+                }
             },
             error: (err) => {
                 this.isLoading = false;
@@ -271,6 +320,25 @@ export class StudentFormComponent implements OnInit {
                     });
                 }
             });
+    }
+
+    resetPassword() {
+        if (confirm('Are you sure you want to reset the password for this student?')) {
+            this.isLoading = true;
+            this._apiService.resetStudentPassword(this.studentId!).subscribe({
+                next: (res: any) => {
+                    this.isLoading = false;
+                    this._dialog.open(StudentCredentialsDialogComponent, {
+                        data: {
+                            username: this.form.get('username')?.value,
+                            password: res.new_password
+                        },
+                        disableClose: true
+                    });
+                },
+                error: () => this.isLoading = false
+            });
+        }
     }
 
     deactivateDiscount(discountId: number) {

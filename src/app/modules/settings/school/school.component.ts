@@ -12,6 +12,11 @@ import { ApiService } from 'app/core/services/api.service';
 import { TerminologyService } from 'app/core/terminology/terminology.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { ViewChild } from '@angular/core';
+import { MatDrawer } from '@angular/material/sidenav';
+
+
 @Component({
     selector: 'app-school-settings',
     standalone: true,
@@ -24,7 +29,8 @@ import { environment } from 'environments/environment';
         MatInputModule,
         MatSelectModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatSidenavModule
     ],
     templateUrl: './school.component.html'
 })
@@ -35,10 +41,17 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
     private _snackBar = inject(MatSnackBar);
     private _terminologyService = inject(TerminologyService);
 
+    @ViewChild('drawer') drawer: MatDrawer;
+
     form: FormGroup;
+    passwordForm: FormGroup;
     isLoading = true;
     isSaving = false;
     logoPreview: string | ArrayBuffer | null = null;
+
+    currentPasswordVisible = false;
+    newPasswordVisible = false;
+    confirmPasswordVisible = false;
     
     tenantId: string | null = null;
     whatsappStatus: string = 'disconnected';
@@ -60,6 +73,17 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
             late_fine_per_month: [0],
             logo: [null]
         });
+
+        this.passwordForm = this._fb.group({
+            current_password: ['', Validators.required],
+            password: ['', [Validators.required, Validators.minLength(8)]],
+            password_confirmation: ['', Validators.required]
+        }, { validators: this.passwordMatchValidator });
+    }
+
+    passwordMatchValidator(g: FormGroup) {
+        return g.get('password').value === g.get('password_confirmation').value
+           ? null : {'mismatch': true};
     }
 
     ngOnInit(): void {
@@ -134,6 +158,34 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
             error: () => {
                 this.isSaving = false;
                 this._snackBar.open('Error saving settings', 'Close', { duration: 3000 });
+            }
+        });
+    }
+
+    openChangePasswordDrawer(): void {
+        this.passwordForm.reset();
+        this.currentPasswordVisible = false;
+        this.newPasswordVisible = false;
+        this.confirmPasswordVisible = false;
+        this.drawer.open();
+    }
+
+    closeDrawer(): void {
+        this.drawer.close();
+    }
+
+    updatePassword(): void {
+        if (this.passwordForm.invalid) return;
+        this.isSaving = true;
+        this._apiService.changeAdminPassword(this.passwordForm.value).subscribe({
+            next: () => {
+                this.isSaving = false;
+                this._snackBar.open('Account password updated successfully', 'Close', { duration: 3000 });
+                this.closeDrawer();
+            },
+            error: (err) => {
+                this.isSaving = false;
+                this._snackBar.open(err.error.message || 'Error updating password', 'Close', { duration: 3000 });
             }
         });
     }

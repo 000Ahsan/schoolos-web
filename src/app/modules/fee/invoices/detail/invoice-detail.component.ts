@@ -134,7 +134,29 @@ export class InvoiceDetailComponent implements OnInit {
         });
     }
 
-    printVoucher() {
-        window.print();
+    downloadVoucher() {
+        if (!this.voucher) return;
+        
+        this._apiService.getVoucherPdf(this.voucherId).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Construct filename for client-side download as well
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '').split('T').join('').split('Z')[0];
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const monthName = monthNames[this.voucher.month - 1];
+                const filename = `${this.voucher.student.name}-${this.voucher.student.roll_no}-${monthName}-${this.voucher.year}-${timestamp}.pdf`.replace(/ /g, '_');
+                
+                link.download = filename;
+                link.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: () => {
+                this._snackBar.open('Error downloading voucher', 'Close', { duration: 3000 });
+            }
+        });
     }
 }
+

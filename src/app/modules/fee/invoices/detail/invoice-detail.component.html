@@ -108,19 +108,20 @@
                 <div class="flex items-center justify-between">
                     <div class="text-3xl font-semibold tracking-tight leading-8">Voucher {{ voucher?.invoice_no }}</div>
                     <div class="flex items-center space-x-4">
-                        <button mat-stroked-button (click)="printVoucher()">
-                            <mat-icon svgIcon="heroicons_outline:printer" class="icon-size-5"></mat-icon>
-                            <span class="ml-2">Print</span>
+                        <button mat-stroked-button (click)="downloadVoucher()">
+                            <mat-icon svgIcon="heroicons_outline:arrow-down-tray" class="icon-size-5"></mat-icon>
+                            <span class="ml-2">Download Voucher</span>
                         </button>
                         <button mat-stroked-button (click)="sendWhatsApp()" [disabled]="isSendingWhatsApp">
                             <mat-icon svgIcon="heroicons_outline:chat-bubble-left-right"
                                 class="icon-size-5 text-green-600"></mat-icon>
-                            <span class="ml-2">WhatsApp</span>
+                            <span class="ml-2">Send on WhatsApp</span>
                         </button>
                         <button mat-flat-button color="primary"
                             *ngIf="voucher?.status !== 'paid' && voucher?.status !== 'void'"
                             (click)="openPaymentDrawer()">
-                            Receive Payment
+                            <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-5"></mat-icon>
+                            <span class="ml-2">Receive Payment</span>
                         </button>
                     </div>
                 </div>
@@ -139,8 +140,8 @@
                     <div class="p-8 sm:p-16">
 
                         <!-- School Header -->
-                        <div class="flex items-start justify-between border-b pb-8">
-                            <div class="flex items-center">
+                        <div class="flex items-start justify-between pb-8">
+                            <div class="flex items-center gap-8">
                                 <div *ngIf="schoolSettings?.logo_url" class="mr-6">
                                     <img [src]="schoolSettings.logo_url" class="w-48 h-48 object-contain" />
                                 </div>
@@ -155,7 +156,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-start justify-between border-b pb-8 mt-8">
+                        <div class="flex items-start justify-between pb-8">
                             <div>
                                 <div class="text-4xl font-semibold tracking-tight text-gray-400 uppercase">Fee Voucher
                                 </div>
@@ -179,7 +180,6 @@
                                         }}</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <div class="text-lg font-medium text-secondary italic">Status:</div>
                                     <div class="mt-1">
                                         <span
                                             class="inline-flex items-center px-4 py-1 rounded-full text-base font-semibold uppercase tracking-wider border-2"
@@ -195,7 +195,7 @@
                         </div>
 
                         <!-- Line Items -->
-                        <div class="mt-12 overflow-x-auto">
+                        <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead>
                                     <tr class="border-b-2 font-medium text-secondary">
@@ -235,7 +235,7 @@
 
                                     <!-- Previous Arrears Breakdown -->
                                     <ng-container *ngIf="voucher.previous_arrears?.length > 0">
-                                        <tr class="border-b bg-red-50/10 text-red-700"
+                                        <tr class="border-b text-red-600"
                                             *ngFor="let arrear of voucher.previous_arrears">
                                             <td class="py-4 px-2">
                                                 <div class="font-bold uppercase text-xs tracking-tight">Previous Balance
@@ -297,12 +297,11 @@
                                     <span class="font-bold">{{ voucher.net_amount | currency:'PKR':'symbol':'1.0-0'
                                         }}</span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b text-red-600 italic bg-red-50/30 px-2"
+                                <div class="flex justify-between py-2 border-b"
                                     *ngIf="voucher.previous_arrears?.length > 0">
-                                    <span
-                                        class="font-medium uppercase text-xs tracking-wider flex items-center h-full">Total
+                                    <span class="font-medium text-secondary">Total
                                         Arrears:</span>
-                                    <span class="font-bold text-lg">{{ (voucher.total_payable - voucher.balance) |
+                                    <span class="font-bold">{{ (voucher.total_payable - voucher.balance) |
                                         currency:'PKR':'symbol':'1.0-0' }}</span>
                                 </div>
                                 <div class="flex justify-between py-2 border-b" *ngIf="voucher.paid_amount > 0">
@@ -324,13 +323,14 @@
                         </div>
 
                         <!-- Footer -->
-                        <div class="mt-16 pt-8 border-t text-sm text-secondary text-center">
-                            <div class="font-bold text-gray-800 mb-1 italic">Notice:</div>
-                            Please pay your voucher by {{ voucher.due_date | date:'mediumDate' }} to avoid late payment
-                            charges
-                            of
-                            {{ schoolSettings?.currency }} {{ schoolSettings?.late_fine_per_month }}. Thank you for your
-                            cooperation.
+                        <div class="pt-8 text-center text-secondary">
+                            <div class="text-primary mb-1 italic text-sm">Notice: Please pay your voucher by {{
+                                voucher.due_date | date:'mediumDate' }} to avoid late payment
+                                charges
+                                of
+                                {{ schoolSettings?.currency }} {{ schoolSettings?.late_fine_per_month }}. Thank you for
+                                your
+                                cooperation.</div>
                         </div>
 
                     </div>

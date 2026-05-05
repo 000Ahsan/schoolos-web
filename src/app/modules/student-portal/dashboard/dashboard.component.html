@@ -1,0 +1,194 @@
+<mat-drawer-container class="absolute inset-0 flex flex-col flex-auto min-h-0 w-full bg-transparent overflow-hidden"
+    [hasBackdrop]="true">
+    <!-- Password Reset Drawer -->
+    <mat-drawer #drawer class="w-full sm:w-128 border-l dark:bg-gray-900 shadow-2xl" position="end" mode="over">
+        <div class="flex flex-col h-full bg-card">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <div class="text-lg font-medium">Change Password</div>
+                <button mat-icon-button (click)="closeDrawer()">
+                    <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
+                </button>
+            </div>
+
+            <div class="flex-auto px-6 py-8 overflow-y-auto w-full">
+                <form [formGroup]="passwordForm" class="flex flex-col gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Current Password</mat-label>
+                        <input matInput [type]="currentPasswordVisible ? 'text' : 'password'"
+                            formControlName="current_password" required>
+                        <button mat-icon-button matSuffix type="button"
+                            (click)="currentPasswordVisible = !currentPasswordVisible">
+                            <mat-icon
+                                [svgIcon]="currentPasswordVisible ? 'heroicons_outline:eye-slash' : 'heroicons_outline:eye'"></mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>New Password</mat-label>
+                        <input matInput [type]="newPasswordVisible ? 'text' : 'password'" formControlName="password"
+                            required>
+                        <button mat-icon-button matSuffix type="button"
+                            (click)="newPasswordVisible = !newPasswordVisible">
+                            <mat-icon
+                                [svgIcon]="newPasswordVisible ? 'heroicons_outline:eye-slash' : 'heroicons_outline:eye'"></mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Confirm New Password</mat-label>
+                        <input matInput [type]="confirmPasswordVisible ? 'text' : 'password'"
+                            formControlName="password_confirmation" required>
+                        <button mat-icon-button matSuffix type="button"
+                            (click)="confirmPasswordVisible = !confirmPasswordVisible">
+                            <mat-icon
+                                [svgIcon]="confirmPasswordVisible ? 'heroicons_outline:eye-slash' : 'heroicons_outline:eye'"></mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordForm.hasError('mismatch')">
+                            Passwords do not match
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+            </div>
+
+            <div class="flex items-center justify-end px-6 py-4 border-t gap-4">
+                <button mat-stroked-button (click)="closeDrawer()">Cancel</button>
+                <button mat-flat-button color="primary" [disabled]="passwordForm.invalid || isSaving"
+                    (click)="updatePassword()">
+                    {{ isSaving ? 'Saving...' : 'Update Password' }}
+                </button>
+            </div>
+        </div>
+    </mat-drawer>
+
+    <mat-drawer-content class="flex flex-col flex-auto overflow-y-auto">
+        <div class="flex flex-col flex-auto min-w-0">
+            <!-- Header -->
+            <div
+                class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+                <div class="flex-auto min-w-0">
+
+                    <!-- Title -->
+                    <div class="mt-2 md:flex items-center justify-between">
+                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                            Welcome back, {{data?.student?.name}}!
+                        </h2>
+                        <button mat-stroked-button color="warn" (click)="openChangePasswordDrawer()"
+                            class="mt-2 md:mt-0">
+                            <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:key'"></mat-icon>
+                            <span class="ml-2">Reset Password</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main -->
+            <div class="flex-auto p-6 sm:p-10">
+                @if (loading) {
+                <div class="flex flex-col flex-auto items-center justify-center h-full">
+                    <mat-progress-spinner [mode]="'indeterminate'"></mat-progress-spinner>
+                </div>
+                } @else {
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+                    <!-- Outstanding Balance -->
+                    <div
+                        class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden border-l-4 border-primary items-center justify-center">
+                        <div class="flex flex-col items-center mt-2">
+                            <div class="text-7xl sm:text-8xl font-bold tracking-tight leading-none text-primary">
+                                {{data?.outstanding_balance | currency:'PKR ':'symbol':'1.0-0'}}
+                            </div>
+                            <div class="text-lg font-medium text-secondary">Total amount due</div>
+                        </div>
+                    </div>
+
+                    <!-- Latest Vouchers Card -->
+                    <div
+                        class="sm:col-span-2 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Recent Vouchers</div>
+                            <button mat-button [color]="'primary'" [routerLink]="['/student/vouchers']">View
+                                All</button>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            @if (data?.recent_vouchers?.length > 0) {
+                            @for (voucher of data?.recent_vouchers; track voucher.id) {
+                            <div
+                                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors">
+                                <div class="flex flex-col min-w-0">
+                                    <div class="font-bold truncate text-gray-900 dark:text-gray-100">
+                                        {{voucher.invoice_no}}</div>
+                                    <div class="text-xs text-secondary">{{getMonthName(voucher.month)}} {{voucher.year}}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end shrink-0 ml-4">
+                                    <div class="font-bold text-gray-900 dark:text-gray-100">{{voucher.net_amount |
+                                        currency:'PKR ':'symbol':'1.0-0'}}</div>
+                                    <span class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+                                        [ngClass]="getStatusColor(voucher.status)">
+                                        {{voucher.status | uppercase}}
+                                    </span>
+                                </div>
+                            </div>
+                            }
+                            } @else {
+                            <div class="flex flex-col items-center justify-center p-8 text-center">
+                                <div class="p-4 bg-gray-100 rounded-full mb-4">
+                                    <mat-icon svgIcon="heroicons_outline:document-text"
+                                        class="icon-size-12 text-hint"></mat-icon>
+                                </div>
+                                <div class="text-xl font-bold tracking-tight text-secondary">No vouchers found</div>
+                                <div class="mt-1 text-secondary max-w-xs text-sm">You don't have any recent fee vouchers
+                                    generated yet.</div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Recent Payments -->
+                    <div
+                        class="sm:col-span-2 lg:col-span-3 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Recent Payments</div>
+                            <button mat-button [color]="'primary'" [routerLink]="['/student/payments']">View
+                                All</button>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            @if (data?.recent_payments?.length > 0) {
+                            @for (payment of data?.recent_payments; track payment.id) {
+                            <div
+                                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors">
+                                <div class="flex flex-col min-w-0">
+                                    <div class="font-bold truncate text-gray-900 dark:text-gray-100">
+                                        {{payment.receipt_no}}</div>
+                                    <div class="text-xs text-secondary">{{payment.payment_date | date}}</div>
+                                </div>
+                                <div class="flex flex-col items-end shrink-0 ml-4">
+                                    <div class="font-bold text-green-600 dark:text-green-400">+{{payment.total_amount |
+                                        currency:'PKR ':'symbol':'1.0-0'}}</div>
+                                    <div
+                                        class="mt-1 text-[10px] uppercase font-bold tracking-wider text-secondary flex items-center">
+                                        <mat-icon class="icon-size-3 mr-1"
+                                            [svgIcon]="'heroicons_outline:credit-card'"></mat-icon>
+                                        {{payment.payment_method}}
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                            } @else {
+                            <div class="flex flex-col items-center justify-center p-8 text-center">
+                                <div class="p-4 bg-gray-100 rounded-full mb-4">
+                                    <mat-icon svgIcon="heroicons_outline:credit-card"
+                                        class="icon-size-12 text-hint"></mat-icon>
+                                </div>
+                                <div class="text-xl font-bold tracking-tight text-secondary">No payments found</div>
+                                <div class="mt-1 text-secondary max-w-xs text-sm">You haven't made any fee payments
+                                    recently.</div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

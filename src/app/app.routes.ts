@@ -3,6 +3,8 @@ import { initialDataResolver } from 'app/app.resolvers';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
+import { StudentGuard } from 'app/core/auth/guards/student/student.guard';
+import { NoStudentGuard } from 'app/core/auth/guards/student/noStudent.guard';
 
 // prettier-ignore
 /* eslint-disable max-len */
@@ -11,6 +13,16 @@ export const appRoutes: Route[] = [
 
     // Redirect empty path to '/dashboard'
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+
+    // Student Portal routes
+    {
+        path: 'student',
+        component: LayoutComponent,
+        data: {
+            layout: 'empty'
+        },
+        loadChildren: () => import('app/modules/student-portal/student-portal.routes').then(m => m.studentPortalRoutes)
+    },
 
     // Redirect signed-in user to the '/dashboards/project'
     //

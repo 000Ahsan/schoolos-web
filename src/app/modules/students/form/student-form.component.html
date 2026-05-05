@@ -10,6 +10,11 @@
                 {{ studentId ? ('Edit ' + ('Student' | term)) : ('New ' + ('Student' | term)) }}
             </div>
             <div class="flex items-center space-x-4">
+                <button *ngIf="studentId" mat-stroked-button color="warn" [disabled]="isLoading"
+                    (click)="resetPassword()">
+                    <mat-icon svgIcon="heroicons_outline:key"></mat-icon>
+                    <span class="ml-2">Reset Password</span>
+                </button>
                 <button mat-flat-button color="primary" [disabled]="isLoading" (click)="save()">
                     <mat-icon svgIcon="heroicons_solid:check"></mat-icon>
                     <span class="ml-2">Save {{ 'Student' | term }}</span>
@@ -82,7 +87,8 @@
                                 <mat-option *ngFor="let cls of classes" [value]="cls.id">{{ cls.name }} - {{ cls.section
                                     }}</mat-option>
                             </mat-select>
-                            <mat-error *ngIf="form.get('class_id')?.hasError('required')">{{ 'Class' | term }} is required</mat-error>
+                            <mat-error *ngIf="form.get('class_id')?.hasError('required')">{{ 'Class' | term }} is
+                                required</mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full">
@@ -120,6 +126,12 @@
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="w-full" *ngIf="studentId">
+                            <mat-label>Portal Username</mat-label>
+                            <mat-icon matPrefix [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+                            <input matInput formControlName="username" readonly>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full" *ngIf="studentId">
                             <mat-label>Status</mat-label>
                             <mat-select formControlName="status">
                                 <mat-option value="active">Active</mat-option>
@@ -128,6 +140,12 @@
                                 <mat-option value="suspended">Suspended</mat-option>
                             </mat-select>
                         </mat-form-field>
+
+                        <div class="flex items-center h-full sm:col-span-2">
+                            <mat-checkbox formControlName="is_portal_enabled" color="primary">
+                                Enable Student Portal Access
+                            </mat-checkbox>
+                        </div>
                     </div>
                 </div>
             </mat-card>
