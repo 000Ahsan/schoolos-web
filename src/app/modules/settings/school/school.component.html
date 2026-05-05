@@ -123,6 +123,13 @@
                                     <mat-icon matPrefix [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
                                 </mat-form-field>
 
+                                <mat-form-field appearance="outline" class="sm:col-span-2">
+                                    <mat-label>Administrator Name</mat-label>
+                                    <input matInput formControlName="admin_name" placeholder="Enter administrator name"
+                                        required>
+                                    <mat-icon matPrefix [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                                </mat-form-field>
+
                                 <!-- Organization Type — owner-only setting that changes app-wide terminology -->
                                 <mat-form-field appearance="outline" class="sm:col-span-2">
                                     <mat-label>Organization Type</mat-label>

@@ -63,6 +63,7 @@ export class SchoolSettingsComponent implements OnInit, OnDestroy {
     constructor() {
         this.form = this._fb.group({
             school_name: ['', Validators.required],
+            admin_name: ['', Validators.required],
             organization_type: ['school'],
             address: [''],
             phone: [''],

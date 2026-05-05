@@ -160,8 +160,8 @@ export class DefaulterListComponent implements OnInit {
                 this._snackBar.open('Reminder queued for sending!', 'Close', { duration: 3000 });
                 this.isLoading = false;
             },
-            error: () => {
-                this._snackBar.open('Error queuing reminder.', 'Close', { duration: 3000 });
+            error: (err) => {
+                this._snackBar.open(err.error?.error || 'Error queuing reminder.', 'Close', { duration: 3000 });
                 this.isLoading = false;
             }
         });
@@ -178,8 +178,8 @@ export class DefaulterListComponent implements OnInit {
                 this.selection.clear();
                 this.isLoading = false;
             },
-            error: () => {
-                this._snackBar.open('Error queuing bulk reminders.', 'Close', { duration: 3000 });
+            error: (err) => {
+                this._snackBar.open(err.error?.error || 'Error queuing bulk reminders.', 'Close', { duration: 3000 });
                 this.isLoading = false;
             }
         });

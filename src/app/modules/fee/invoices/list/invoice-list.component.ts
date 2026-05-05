@@ -176,8 +176,8 @@ export class InvoiceListComponent implements OnInit {
             next: (res) => {
                 this._snackBar.open(res.message || 'Voucher sent to WhatsApp', 'Close', { duration: 3000 });
             },
-            error: () => {
-                this._snackBar.open('Failed to send voucher. Ensure WhatsApp service is running.', 'Close', { duration: 3000 });
+            error: (err) => {
+                this._snackBar.open(err.error?.error || 'Failed to send voucher. Ensure WhatsApp service is running.', 'Close', { duration: 3000 });
             }
         });
     }
